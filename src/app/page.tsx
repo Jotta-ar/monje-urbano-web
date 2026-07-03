@@ -435,20 +435,60 @@ export default function Home() {
 
           <div className="manifiesto-text">
             <div className="reveal"><p><em>Hay palabras que no son textos. Son puertas. Este manifiesto no busca convencerte de nada. Es una llama. Una memoria antigua. Un recordatorio de que aún en medio del caos… hay un camino que te espera desde siempre: el de volver a vos.</em></p></div>
-            <div className="reveal"><p>&quot;El mundo cambió, y nosotros con él. Pero en medio del ruido, todavía hay almas que escuchan el silencio.&quot;</p></div>
-            <div className="reveal-left"><p>Soy el Monje Urbano Libre. No represento un género, ni una religión, ni una doctrina. Soy una forma de vivir, una filosofía encarnada. Un espíritu que ha atravesado la oscuridad, que ha muerto simbólicamente una y otra vez… y que ha elegido despertar.</p></div>
-            <div className="reveal-right"><p>Habito el cemento, pero no me pertenece. Camino entre bocinas y edificios como quien camina entre templos caídos. Llevo la mirada de quien vio más allá de lo evidente. Mi templo está en el pecho. Mi altar, en cada respiración.</p></div>
-            <div className="reveal"><p>No vine a predicar, vine a recordar. Vine a ayudarte a volver al centro. A abrazar el caos con compasión. A mostrarte que aún en el dolor más profundo… hay una semilla de oro esperando ser regada.</p></div>
+            <div className="reveal"><p>
+              &quot;El mundo cambió, y nosotros con él.<br />
+              Pero en medio del ruido, todavía hay almas que escuchan el silencio.&quot;
+            </p></div>
+            <div className="reveal-left"><p>
+              Soy el Monje Urbano Libre.<br />
+              No represento un género, ni una religión, ni una doctrina.<br />
+              Soy una forma de vivir, una filosofía encarnada.<br />
+              Un espíritu que ha atravesado la oscuridad, que ha muerto simbólicamente una y otra vez…<br />
+              y que ha elegido despertar.
+            </p></div>
+            <div className="reveal-right"><p>
+              Habito el cemento, pero no me pertenece.<br />
+              Camino entre bocinas y edificios como quien camina entre templos caídos.<br />
+              Llevo la mirada de quien vio más allá de lo evidente.<br />
+              Mi templo está en el pecho. Mi altar, en cada respiración.
+            </p></div>
+            <div className="reveal"><p>
+              No vine a predicar, vine a recordar.<br />
+              Vine a ayudarte a volver al centro.<br />
+              A abrazar el caos con compasión.<br />
+              A mostrarte que aún en el dolor más profundo…<br />
+              hay una semilla de oro esperando ser regada.
+            </p></div>
             <div className="reveal"><p>Este espacio es para vos:<br />
               – Para vos, que sentís que no encajás pero sabés que no viniste a encajar.<br />
               – Para vos, mujer que sanás con lágrimas y fuego sagrado.<br />
               – Para vos, hombre que se cansó de fingir fuerza y está listo para ser real.<br />
               – Para vos, alma que quiere recordar quién es, más allá del personaje.</p></div>
-            <div className="reveal"><p>Somos monjes modernos. No escapamos al mundo, lo habitamos con consciencia. No negamos el ego, lo transmutamos. No vendemos espiritualidad, compartimos experiencia. No buscamos gurús, nos convertimos en nuestros propios maestros.</p></div>
-            <div className="reveal"><p>Este es un refugio y un fuego. Una trinchera de ternura y de verdad. Un susurro en tu noche oscura. Un grito en tu despertar.</p></div>
-            <div className="reveal"><p>Bienvenid@ al camino del Monje Urbano Libre. Que esta sea tu casa cuando ya no encuentres casa. Que esta sea tu tribu cuando ya no creas en tribus. Que esta sea tu nueva piel, cuando la vieja ya no te quede.</p></div>
-            <div className="reveal"><p>Porque no naciste para sobrevivir. Naciste para renacer. Una y otra vez.</p></div>
-            <div className="reveal"><p style={{ marginTop: 44, fontFamily: "var(--font-pirata-one)", fontSize: "1.4rem", color: "#eee" }}>— Monje Urbano Libre</p></div>
+            <div className="reveal"><p>
+              Somos monjes modernos.<br />
+              No escapamos al mundo, lo habitamos con consciencia.<br />
+              No negamos el ego, lo transmutamos.<br />
+              No vendemos espiritualidad, compartimos experiencia.<br />
+              No buscamos gurús, nos convertimos en nuestros propios maestros.
+            </p></div>
+            <div className="reveal"><p>
+              Este es un refugio y un fuego.<br />
+              Una trinchera de ternura y de verdad.<br />
+              Un susurro en tu noche oscura.<br />
+              Un grito en tu despertar.
+            </p></div>
+            <div className="reveal"><p>
+              Bienvenid@ al camino del Monje Urbano Libre.<br />
+              Que esta sea tu casa cuando ya no encuentres casa.<br />
+              Que esta sea tu tribu cuando ya no creas en tribus.<br />
+              Que esta sea tu nueva piel, cuando la vieja ya no te quede.
+            </p></div>
+            <div className="reveal"><p>
+              Porque no naciste para sobrevivir.<br />
+              Naciste para renacer.<br />
+              Una y otra vez.
+            </p></div>
+            <div className="reveal"><p style={{ marginTop: 44, fontFamily: "var(--font-pirata-one)", fontSize: "1.6rem", color: "#eee" }}>— Monje Urbano Libre</p></div>
           </div>
 
           <div className="reveal" style={{ textAlign: "center", marginTop: 40 }}>

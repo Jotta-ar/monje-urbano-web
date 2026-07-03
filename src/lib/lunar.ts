@@ -16,7 +16,7 @@ export function getSincronario(now = new Date()): Sincronario {
   const luna = Math.floor(day / 28) + 1;
   const dia = (day % 28) + 1;
 
-  const newMoonRef = Date.UTC(2026, 0, 7, 0, 24);
+  const newMoonRef = Date.UTC(2026, 0, 18, 19, 52); // Luna nueva real: 18 ene 2026, 19:52 UTC
   let lunarDay = ((today - newMoonRef) / 86400000) % 29.53059;
   if (lunarDay < 0) lunarDay += 29.53059;
 

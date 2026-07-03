@@ -402,11 +402,16 @@ section {
 
 .manifiesto-text p {
   position: relative;
-  font-size: 1.2rem;
-  line-height: 2;
-  color: #bbb;
+  font-size: 1.55rem;
+  line-height: 1.7;
+  color: #ccc;
   text-align: center;
-  margin-bottom: 22px;
+  margin-bottom: 34px;
+}
+
+.manifiesto-text {
+  max-width: 720px;
+  margin: 0 auto;
 }
 
 .faq-grid {
