@@ -1,36 +1,56 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Monje Urbano Libre — sitio web
 
-## Getting Started
+Next.js (App Router) + TypeScript + Supabase, siguiendo la recomendación técnica del
+desarrollador (`MUL.pdf`).
 
-First, run the development server:
+## Desarrollo local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Abrí http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Poner en marcha el backend (Supabase)
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+El sitio funciona hoy sin backend (los formularios muestran las pantallas de
+confirmación, pero no guardan nada todavía). Para que empiece a guardar consultas,
+compras, newsletter y testimonios:
 
-## Learn More
+1. Creá un proyecto gratis en https://supabase.com
+2. En el SQL Editor del proyecto, pegá y ejecutá el contenido de `supabase/schema.sql`
+   (crea las tablas `precios`, `consultas`, `newsletter_subscribers`, `compras` y
+   `testimonios`, con los permisos necesarios).
+3. Copiá `.env.local.example` a `.env.local` y completá:
+   - `NEXT_PUBLIC_SUPABASE_URL` y `NEXT_PUBLIC_SUPABASE_ANON_KEY` (Project Settings → API)
+4. Reiniciá `npm run dev`. El panel `/admin` y todos los formularios ya van a guardar
+   en la base de datos.
+5. Para el panel de precios (`/admin`), creá un usuario administrador en
+   Supabase → Authentication → Users, y usá ese email/contraseña para entrar.
 
-To learn more about Next.js, take a look at the following resources:
+## Pagos (Mercado Pago / Stripe)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+Los botones de pago están armados (con selector de moneda ARS/USD) pero en "modo de
+prueba" hasta que completes en `.env.local`:
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+- `MERCADOPAGO_ACCESS_TOKEN` / `NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY`
+- `STRIPE_SECRET_KEY` / `NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY`
 
-## Deploy on Vercel
+Conectar el checkout real de cada pasarela (crear la preferencia de pago / sesión de
+Stripe y confirmar el pago por webhook) es el siguiente paso una vez que tengas las
+cuentas creadas — avisame cuando las tengas y lo conectamos.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Emails automáticos
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Para que el link de regalo, las notificaciones de compra/consulta y el mail de
+"contanos tu experiencia" (Semillas del Camino) se envíen solos, hace falta un
+servicio de email transaccional (recomendado: Resend, resend.com) y su
+`RESEND_API_KEY` en `.env.local`. Mientras tanto, todo lo demás (guardar en la base,
+mostrar los formularios, etc.) funciona igual.
+
+## Deploy
+
+Recomendado: Vercel (gratis para empezar), conectando este repo y cargando las mismas
+variables de entorno en el panel de Vercel. Los dominios `monjeurbanolibre.com` y
+`monjeurbanolibre.com.ar` se apuntan ahí una vez que el proyecto esté conectado.

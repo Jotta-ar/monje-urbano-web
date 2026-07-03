@@ -1,0 +1,68 @@
+"use client";
+
+import { useState } from "react";
+import { supabase } from "@/lib/supabase";
+
+export default function ContactForm() {
+  const [status, setStatus] = useState<"idle" | "sent" | "error">("idle");
+
+  async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
+    e.preventDefault();
+    const form = e.currentTarget;
+    const nombre = (form.elements.namedItem("nombre") as HTMLInputElement).value;
+    const email = (form.elements.namedItem("email") as HTMLInputElement).value;
+    const asunto = (form.elements.namedItem("asunto") as HTMLSelectElement).value;
+    const mensaje = (form.elements.namedItem("mensaje") as HTMLTextAreaElement).value;
+
+    if (supabase) {
+      const { error } = await supabase.from("consultas").insert({
+        servicio: asunto,
+        nombre,
+        apellido: "",
+        email,
+        whatsapp: "",
+        mensaje,
+      });
+      if (error) {
+        console.error("contacto insert failed:", error);
+        setStatus("error");
+        return;
+      }
+    }
+    setStatus("sent");
+    form.reset();
+  }
+
+  if (status === "sent") {
+    return <p style={{ color: "#ccc" }}>Mensaje enviado. Gracias por escribir.</p>;
+  }
+
+  if (status === "error") {
+    return (
+      <p style={{ color: "#e88" }}>
+        No pudimos enviar tu mensaje.{" "}
+        <button className="btn-secondary" style={{ padding: "4px 14px" }} onClick={() => setStatus("idle")}>
+          Reintentar
+        </button>
+      </p>
+    );
+  }
+
+  return (
+    <form className="form-plain" style={{ padding: 0 }} onSubmit={handleSubmit}>
+      <div className="form-group"><input type="text" name="nombre" placeholder="Nombre completo" required /></div>
+      <div className="form-group"><input type="email" name="email" placeholder="Email" required /></div>
+      <div className="form-group">
+        <select name="asunto" required defaultValue="">
+          <option value="" disabled>Asunto de tu mensaje</option>
+          <option>Consulta</option>
+          <option>Comentario</option>
+          <option>Colaboración</option>
+          <option>Otro</option>
+        </select>
+      </div>
+      <div className="form-group"><textarea name="mensaje" placeholder="Tu mensaje" required /></div>
+      <button type="submit" className="btn-primary">Enviar mensaje</button>
+    </form>
+  );
+}
