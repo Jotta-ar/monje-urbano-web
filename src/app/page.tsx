@@ -345,13 +345,19 @@ export default function Home() {
           </div>
           <div className="prod-grid stagger-cards">
             <div className="prod-card">
-              <h3>Talismanes del Monje</h3>
-              <p className="prod-sub">Amuletos de madera grabados con el símbolo sagrado</p>
+              <h3>Talismanes del Monje Urbano Libre</h3>
+              <p className="prod-sub">
+                Amuletos de madera grabados con el símbolo sagrado, creados para acompañar
+                procesos de transformación y presencia.
+              </p>
               <a href="#producto-talismanes" className="card-btn">Ver más</a>
             </div>
             <div className="prod-card">
               <h3>Porta Sahumerios Invertidos</h3>
-              <p className="prod-sub">Piezas artesanales en madera con diseño zen</p>
+              <p className="prod-sub">
+                Piezas artesanales en madera, diseñadas con estética zen y grabado del
+                símbolo del Monje; funcionales y simbólicas.
+              </p>
               <a href="#producto-porta-sahumerio" className="card-btn">Ver más</a>
             </div>
           </div>
@@ -362,10 +368,7 @@ export default function Home() {
       <section id="producto-talismanes">
         <div className="container text-block prod-detail">
           <div className="reveal">
-            <h2 className="section-title">Talismanes del Monje</h2>
-            <p className="section-sub" style={{ marginBottom: 36 }}>
-              Amuletos de madera grabados con el símbolo sagrado
-            </p>
+            <h2 className="section-title">Talismanes del Monje Urbano Libre</h2>
           </div>
 
           <div className="prod-detail-grid">
@@ -373,21 +376,88 @@ export default function Home() {
               <span>Foto del producto próximamente</span>
             </div>
             <div className="reveal-right">
+              <h3 style={{ marginTop: 0 }}>Qué es</h3>
               <p>
                 El Talismán del Monje Urbano Libre es mucho más que un colgante: es un
-                símbolo vivo de conexión, conciencia y propósito. Grabado con láser sobre
-                madera de cedro natural, representa la unión entre el espíritu y la
-                materia.
+                símbolo vivo de conexión, conciencia y propósito.
               </p>
               <p>
-                <strong>Material:</strong> Madera de cedro natural · <strong>Medida:</strong> 4 × 2 cm ·{" "}
-                <strong>Incluye:</strong> tarjeta con texto poético + ritual de activación
+                Grabado con láser sobre madera de cedro natural, representa la unión entre
+                el espíritu y la materia, recordándote que cada día es una oportunidad para
+                vivir con presencia y autenticidad.
               </p>
-              <div className="reveal" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 20 }}>
+              <p>
+                El diseño sagrado que lo compone —triángulo, círculo y línea— refleja los
+                tres planos del ser: el espíritu que asciende, el alma que observa, la
+                tierra que sostiene.
+              </p>
+              <p>
+                Cada pieza es única, con vetas propias del cedro, grabada con precisión y
+                montada a mano con argollas metálicas y tira de gamuza con cierre gancho.
+              </p>
+              <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 20 }}>
                 <ComingSoonButton className="btn-primary">Comprar Talismán</ComingSoonButton>
                 <Link href="/consultas?servicio=Talismanes+del+Monje" className="btn-outline">Consultar</Link>
               </div>
             </div>
+          </div>
+
+          <div className="reveal"><h3>Significado espiritual</h3>
+          <p>
+            Este talismán fue creado como un recordatorio constante: no es un accesorio,
+            es un llamado. Un llamado a despertar, a recordar tu esencia, a caminar con
+            propósito. Cada vez que lo lleves, su energía resonará con tu intención y
+            acompañará tu transformación interior.
+          </p></div>
+
+          <div className="reveal-left"><h3>Detalles del producto</h3>
+          <ul>
+            <li><strong>Material:</strong> madera de cedro natural</li>
+            <li><strong>Grabado:</strong> láser de precisión</li>
+            <li><strong>Medida:</strong> 4 × 2 cm (aprox.)</li>
+            <li><strong>Cordón:</strong> gamuza con cierre metálico</li>
+            <li><strong>Incluye:</strong> tarjeta con texto poético del talismán + ritual de activación paso a paso</li>
+          </ul></div>
+
+          <div className="reveal-right"><h3>Para quién</h3>
+          <ul>
+            <li>Quien desea un ancla de presencia para el día a día</li>
+            <li>Personas en procesos de cambio, renacimiento o búsqueda de claridad</li>
+            <li>Quienes valoran los símbolos sagrados y la belleza artesanal</li>
+            <li>Quien practica meditación y quiere consagrar un objeto de poder personal</li>
+            <li>Quien desea un amuleto minimalista con significado espiritual, sin dogmas</li>
+            <li>Para regalar a alguien que inicia una nueva etapa y necesita un recordatorio de su esencia</li>
+          </ul></div>
+
+          <div className="reveal"><h3>Cómo se usa</h3>
+          <ul>
+            <li><strong>Activación inicial:</strong> seguí el ritual de activación incluido para sellar la conexión entre vos y el símbolo</li>
+            <li><strong>Uso diario:</strong> colgalo sobre el pecho. Tomá tres respiraciones profundas sosteniéndolo entre las manos y repetí tu intención en voz baja</li>
+            <li><strong>En meditación:</strong> apoyalo sobre el corazón o sostenelo en la mano dominante</li>
+            <li><strong>En movimiento:</strong> usalo como recordatorio de presencia; cada vez que lo sientas, volvé a tu eje</li>
+          </ul></div>
+
+          <div className="reveal"><h3>Cuidado</h3>
+          <ul>
+            <li>Evitá inmersión prolongada en agua (baño, piscina, mar)</li>
+            <li>No aplicar perfumes, alcohol o productos abrasivos sobre la madera</li>
+            <li>Guardalo en un sobre o bolsita de tela, lejos de fuentes de calor directo o sol intenso</li>
+            <li>Para mantener la madera, podés pasar apenas un paño seco; si hiciera falta, una microgota de aceite mineral/almendras 1–2 veces al año</li>
+          </ul></div>
+
+          <div className="reveal"><h3>Preguntas frecuentes</h3>
+          <div className="faq-grid" style={{ marginTop: 20 }}>
+            <div className="faq-item"><strong>¿Viene activado?</strong><span>Incluye un ritual de activación para que lo cargues con tu propia intención. Podés repetirlo cuando lo sientas necesario.</span></div>
+            <div className="faq-item"><strong>¿Necesito seguir alguna creencia específica?</strong><span>No. Es un objeto espiritual y minimalista, sin marcos religiosos obligatorios.</span></div>
+            <div className="faq-item"><strong>¿Puedo mojarlo?</strong><span>Puede tolerar salpicaduras ocasionales, pero evitá mojarlo o sumergirlo. Secá de inmediato si ocurre.</span></div>
+            <div className="faq-item"><strong>¿Cómo sé si está &quot;activo&quot;?</strong><span>Notás claridad, calma o simple recuerdo del propósito al tomarlo. Si sentís que se &quot;apaga&quot;, repetí el ritual breve.</span></div>
+            <div className="faq-item"><strong>¿Sirve como regalo?</strong><span>Sí. Podés activar el talismán con una intención amorosa para esa persona, o entregar la tarjeta para que lo active quien lo reciba.</span></div>
+            <div className="faq-item"><strong>¿Puedo combinarlo con otros rituales del Monje?</strong><span>Claro que sí. Todos los productos y servicios forman un ecosistema que, practicado con constancia, se convierte en filosofía de vida.</span></div>
+          </div></div>
+
+          <div className="reveal" style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+            <ComingSoonButton className="btn-primary">Comprar Talismán</ComingSoonButton>
+            <Link href="/consultas?servicio=Talismanes+del+Monje" className="btn-outline">Consultar</Link>
           </div>
         </div>
       </section>
@@ -396,9 +466,9 @@ export default function Home() {
       <section id="producto-porta-sahumerio">
         <div className="container text-block prod-detail">
           <div className="reveal">
-            <h2 className="section-title">Porta Sahumerios Invertidos</h2>
+            <h2 className="section-title">Porta Sahumerio Invertido del Monje</h2>
             <p className="section-sub" style={{ marginBottom: 36 }}>
-              Piezas artesanales en madera con diseño zen
+              Sutil como el humo, profundo como el silencio.
             </p>
           </div>
 
@@ -407,20 +477,61 @@ export default function Home() {
               <span>Foto del producto próximamente</span>
             </div>
             <div className="reveal-right">
+              <p style={{ marginTop: 0 }}>Cada pieza es una invitación al ritual.</p>
               <p>
                 El Porta Sahumerio Invertido del Monje Urbano Libre fusiona la calidez de
                 la madera con la firmeza del metal en un diseño que eleva el humo como un
-                suspiro ascendente. Lleva grabado el símbolo sagrado del Monje.
+                suspiro ascendente.
               </p>
               <p>
-                <strong>Seguro:</strong> El soporte no permite que el sahumerio se suelte ·{" "}
-                <strong>Incluye:</strong> tarjeta con texto poético
+                Creado para quienes buscan más que un objeto decorativo, este soporte
+                representa la unión entre lo material y lo invisible: el fuego que se
+                transforma en aroma, el instante que se vuelve presencia.
               </p>
-              <div className="reveal" style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 20 }}>
+              <p>
+                Lleva grabado en láser el símbolo sagrado del Monje Urbano Libre,
+                convirtiéndolo en un amuleto energético y estético que acompaña tus
+                prácticas espirituales con sobriedad y poder.
+              </p>
+              <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 20 }}>
                 <ComingSoonButton className="btn-primary">Comprar</ComingSoonButton>
                 <Link href="/consultas?servicio=Porta+Sahumerios+Invertidos" className="btn-outline">Consultar</Link>
               </div>
             </div>
+          </div>
+
+          <div className="reveal-left"><h3>¿Para quién es?</h3>
+          <ul>
+            <li>Para quienes desean transformar un momento cotidiano en un acto sagrado</li>
+            <li>Para quienes buscan anclar su meditación, oración o lectura diaria con un símbolo físico y bello</li>
+            <li>Para quienes ya practican rituales del Monje y desean incorporar una pieza clave que sostenga la intención</li>
+            <li>Para quienes valoran la estética espiritual, minimalista y simbólica</li>
+            <li>Para quienes eligen regalar calma, presencia y significado</li>
+          </ul></div>
+
+          <div className="reveal-right"><h3>Cuidados</h3>
+          <ul>
+            <li>La base de madera está protegida con laca, por lo que resiste el contacto con agua</li>
+            <li>El cuenco puede contener una gran cantidad de cenizas —hasta más de 20 sahumerios sin limpiar— manteniendo el orden del espacio y evitando suciedad</li>
+            <li>Es extremadamente seguro incluso sin supervisión, ya que el soporte no permite que el sahumerio se suelte bajo ningún punto de vista</li>
+            <li>Aun así, como con todo elemento encendido, se recomienda siempre un uso consciente</li>
+          </ul></div>
+
+          <div className="reveal"><h3>Preguntas frecuentes</h3>
+          <div className="faq-grid" style={{ marginTop: 20 }}>
+            <div className="faq-item"><strong>¿Sirve para cualquier sahumerio?</strong><span>Sirve para la mayoría de los sahumerios comerciales.</span></div>
+            <div className="faq-item"><strong>¿El símbolo grabado tiene algún efecto energético?</strong><span>Sí. Actúa como anclaje vibracional — no es solo decorativo, fue creado para acompañar procesos de transformación y despertar interior.</span></div>
+            <div className="faq-item"><strong>¿Puedo combinarlo con otros rituales del Monje?</strong><span>Por supuesto. Todos los productos y servicios forman un ecosistema que, practicado con constancia, se convierte en filosofía de vida.</span></div>
+            <div className="faq-item"><strong>¿Es frágil?</strong><span>No. Está construido con materiales firmes, sólido, estable y funcional — aun así, recomendamos tratarlo con respeto y cuidado.</span></div>
+          </div>
+          <p style={{ marginTop: 20 }}>
+            Cada pieza incluye una tarjeta con texto poético y una breve sugerencia
+            ritual para acompañar su uso.
+          </p></div>
+
+          <div className="reveal" style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+            <ComingSoonButton className="btn-primary">Comprar</ComingSoonButton>
+            <Link href="/consultas?servicio=Porta+Sahumerios+Invertidos" className="btn-outline">Consultar</Link>
           </div>
         </div>
       </section>
