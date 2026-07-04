@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import type { Session } from "@supabase/supabase-js";
 
@@ -81,13 +80,5 @@ export default function AdminGate({
     );
   }
 
-  return (
-    <>
-      <div style={{ display: "flex", gap: 16, marginBottom: 24, fontSize: "0.85rem" }}>
-        <Link href="/admin" className="btn-secondary" style={{ padding: "6px 18px" }}>Precios</Link>
-        <Link href="/admin/pedidos" className="btn-secondary" style={{ padding: "6px 18px" }}>Pedidos</Link>
-      </div>
-      {children(session)}
-    </>
-  );
+  return <>{children(session)}</>;
 }

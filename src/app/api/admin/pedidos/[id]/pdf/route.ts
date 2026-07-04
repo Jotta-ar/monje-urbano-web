@@ -3,6 +3,7 @@ import { renderToBuffer } from "@react-pdf/renderer";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import PedidoPdfDocument from "@/lib/PedidoPdfDocument";
+import { nombreArchivoPedido } from "@/lib/pedidoFilename";
 
 export async function GET(
   req: NextRequest,
@@ -25,11 +26,12 @@ export async function GET(
   }
 
   const buffer = await renderToBuffer(PedidoPdfDocument({ pedido }));
+  const filename = nombreArchivoPedido(pedido);
 
   return new NextResponse(new Uint8Array(buffer), {
     headers: {
       "Content-Type": "application/pdf",
-      "Content-Disposition": `attachment; filename="pedido-${id.slice(0, 8)}.pdf"`,
+      "Content-Disposition": `attachment; filename="${filename}"`,
     },
   });
 }

@@ -50,8 +50,13 @@ create table if not exists newsletter_subscribers (
 );
 
 -- ========== COMPRAS (compradores + flujo regalo) ==========
+-- Secuencia global (no por servicio) para el número de pedido, usado en el
+-- nombre del archivo del PDF: 001001-Magia-Sanadora-2026-07-04.pdf
+create sequence if not exists compras_numero_seq start 1001;
+
 create table if not exists compras (
   id uuid primary key default gen_random_uuid(),
+  numero integer not null default nextval('compras_numero_seq'),
   servicio text not null,                 -- manifiesto | cartografia | magia_sanadora | ritual_matutino
   modalidad text,                         -- ej. serie elegida en Magia Sanadora
   es_regalo boolean not null default false,
@@ -87,6 +92,7 @@ create table if not exists compras (
 );
 
 create unique index if not exists compras_token_idx on compras (token);
+create unique index if not exists compras_numero_idx on compras (numero);
 
 -- ========== SEMILLAS DEL CAMINO (testimonios) ==========
 create table if not exists testimonios (
