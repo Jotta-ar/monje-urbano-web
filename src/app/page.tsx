@@ -455,9 +455,12 @@ export default function Home() {
             <div className="faq-item"><strong>¿Puedo combinarlo con otros rituales del Monje?</strong><span>Claro que sí. Todos los productos y servicios forman un ecosistema que, practicado con constancia, se convierte en filosofía de vida.</span></div>
           </div></div>
 
-          <div className="reveal" style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
-            <ComingSoonButton className="btn-primary">Comprar Talismán</ComingSoonButton>
-            <Link href="/consultas?servicio=Talismanes+del+Monje" className="btn-outline">Consultar</Link>
+          <div className="reveal" style={{ textAlign: "center", marginTop: 40 }}>
+            <PriceTag ids={["talisman"]} labels={["Talismán"]} />
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+              <ComingSoonButton className="btn-primary">Comprar Talismán</ComingSoonButton>
+              <Link href="/consultas?servicio=Talismanes+del+Monje" className="btn-outline">Consultar</Link>
+            </div>
           </div>
         </div>
       </section>
@@ -529,9 +532,12 @@ export default function Home() {
             ritual para acompañar su uso.
           </p></div>
 
-          <div className="reveal" style={{ textAlign: "center", marginTop: 40, display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
-            <ComingSoonButton className="btn-primary">Comprar</ComingSoonButton>
-            <Link href="/consultas?servicio=Porta+Sahumerios+Invertidos" className="btn-outline">Consultar</Link>
+          <div className="reveal" style={{ textAlign: "center", marginTop: 40 }}>
+            <PriceTag ids={["porta_sahumerio"]} labels={["Porta Sahumerio"]} />
+            <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
+              <ComingSoonButton className="btn-primary">Comprar</ComingSoonButton>
+              <Link href="/consultas?servicio=Porta+Sahumerios+Invertidos" className="btn-outline">Consultar</Link>
+            </div>
           </div>
         </div>
       </section>

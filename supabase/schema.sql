@@ -22,7 +22,9 @@ insert into precios (id, label, monto_ars, monto_usd) values
   ('magia_serie3', 'Magia Sanadora — Serie 3', null, null),
   ('magia_serie6', 'Magia Sanadora — Serie 6', null, null),
   ('magia_serie9', 'Magia Sanadora — Serie 9', null, null),
-  ('ritual_matutino', 'Ritual Matutino Personalizado (PDF)', null, null)
+  ('ritual_matutino', 'Ritual Matutino Personalizado (PDF)', null, null),
+  ('talisman', 'Talismán del Monje Urbano Libre', null, null),
+  ('porta_sahumerio', 'Porta Sahumerio Invertido', null, null)
 on conflict (id) do nothing;
 
 -- ========== CONSULTAS (consultantes) ==========

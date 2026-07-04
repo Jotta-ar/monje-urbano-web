@@ -50,11 +50,11 @@ export default function AdminPage() {
 }
 
 function AdminTabs({ session }: { session: Session }) {
-  const [tab, setTab] = useState<"precios" | "pedidos">("pedidos");
+  const [tab, setTab] = useState<"precios" | "pedidos" | "regalar">("pedidos");
 
   return (
     <div className="form-plain" style={{ maxWidth: 1000 }}>
-      <div style={{ display: "flex", gap: 10, marginBottom: 28 }}>
+      <div style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}>
         <button
           type="button"
           className={tab === "pedidos" ? "btn-primary" : "btn-secondary"}
@@ -62,6 +62,14 @@ function AdminTabs({ session }: { session: Session }) {
           onClick={() => setTab("pedidos")}
         >
           Pedidos
+        </button>
+        <button
+          type="button"
+          className={tab === "regalar" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("regalar")}
+        >
+          Regalar
         </button>
         <button
           type="button"
@@ -73,7 +81,9 @@ function AdminTabs({ session }: { session: Session }) {
         </button>
       </div>
 
-      {tab === "pedidos" ? <PedidosPanel session={session} /> : <PreciosPanel />}
+      {tab === "pedidos" && <PedidosPanel session={session} />}
+      {tab === "regalar" && <RegalarPanel session={session} />}
+      {tab === "precios" && <PreciosPanel />}
     </div>
   );
 }
@@ -285,6 +295,118 @@ function PedidosPanel({ session }: { session: Session }) {
           </div>
         );
       })}
+    </div>
+  );
+}
+
+const SERVICIOS_REGALABLES = [
+  { id: "manifiesto", label: "Manifiesto Personalizado" },
+  { id: "cartografia", label: "Cartografía del Síntoma" },
+  { id: "magia_sanadora", label: "Magia Sanadora" },
+  { id: "ritual_matutino", label: "Ritual Matutino Personalizado" },
+];
+
+function RegalarPanel({ session }: { session: Session }) {
+  const [servicio, setServicio] = useState(SERVICIOS_REGALABLES[0].id);
+  const [destinatarioNombre, setDestinatarioNombre] = useState("");
+  const [destinatarioApellido, setDestinatarioApellido] = useState("");
+  const [destinatarioEmail, setDestinatarioEmail] = useState("");
+  const [motivo, setMotivo] = useState("");
+  const [link, setLink] = useState<string | null>(null);
+  const [copiado, setCopiado] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [creando, setCreando] = useState(false);
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setError(null);
+    setCreando(true);
+    setLink(null);
+    const res = await fetch("/api/admin/regalos", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+      body: JSON.stringify({ servicio, destinatarioNombre, destinatarioApellido, destinatarioEmail, motivo }),
+    });
+    setCreando(false);
+    if (!res.ok) {
+      setError("No se pudo generar el link. Probá de nuevo.");
+      return;
+    }
+    const { token } = await res.json();
+    setLink(`${window.location.origin}/completar/${token}`);
+  }
+
+  function copiar() {
+    if (!link) return;
+    navigator.clipboard.writeText(link);
+    setCopiado(true);
+    setTimeout(() => setCopiado(false), 1500);
+  }
+
+  return (
+    <div>
+      <div className="form-header">
+        <h1>Regalar</h1>
+        <p>
+          Generá un link de regalo sin pago real — para regalos personales, colaboraciones, o
+          para juntar las primeras Semillas del Camino. Quien lo reciba completa su formulario
+          en <code>/completar/…</code> sin tener que pagar nada.
+        </p>
+      </div>
+
+      {error && <p style={{ color: "#ff6666", fontSize: "0.85rem", marginBottom: 16 }}>{error}</p>}
+
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label>Servicio</label>
+          <select value={servicio} onChange={(e) => setServicio(e.target.value)}>
+            {SERVICIOS_REGALABLES.map((s) => (
+              <option key={s.id} value={s.id}>{s.label}</option>
+            ))}
+          </select>
+        </div>
+
+        <div className="form-row">
+          <div className="form-group">
+            <label>Nombre del destinatario (opcional)</label>
+            <input type="text" value={destinatarioNombre} onChange={(e) => setDestinatarioNombre(e.target.value)} />
+          </div>
+          <div className="form-group">
+            <label>Apellido (opcional)</label>
+            <input type="text" value={destinatarioApellido} onChange={(e) => setDestinatarioApellido(e.target.value)} />
+          </div>
+        </div>
+
+        <div className="form-group">
+          <label>Email del destinatario (opcional)</label>
+          <input type="email" value={destinatarioEmail} onChange={(e) => setDestinatarioEmail(e.target.value)} />
+          <p className="hint">Solo para tu registro — el link lo enviás vos por donde prefieras.</p>
+        </div>
+
+        <div className="form-group">
+          <label>Motivo (opcional, solo para vos)</label>
+          <input
+            type="text"
+            placeholder="Ej: Colaboración con @tal, regalo personal, semilla inicial..."
+            value={motivo}
+            onChange={(e) => setMotivo(e.target.value)}
+          />
+        </div>
+
+        <button type="submit" className="btn-primary" disabled={creando}>
+          {creando ? "Generando…" : "Generar link de regalo"}
+        </button>
+      </form>
+
+      {link && (
+        <div className="form-section" style={{ marginTop: 24 }}>
+          <h2 style={{ fontSize: "1rem" }}>Listo, mandale este link</h2>
+          <p style={{ wordBreak: "break-all", color: "#ccc", fontSize: "0.9rem" }}>{link}</p>
+          <button type="button" className="btn-secondary" onClick={copiar}>
+            {copiado ? "Copiado ✓" : "Copiar link"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
