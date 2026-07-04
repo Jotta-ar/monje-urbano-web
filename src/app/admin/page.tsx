@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabase";
-import type { Session } from "@supabase/supabase-js";
+import AdminGate from "@/components/admin/AdminGate";
 
 interface PrecioRow {
   id: string;
@@ -12,43 +12,22 @@ interface PrecioRow {
 }
 
 export default function AdminPage() {
-  const [session, setSession] = useState<Session | null>(null);
-  const [loading, setLoading] = useState(true);
+  return <AdminGate>{() => <PreciosPanel />}</AdminGate>;
+}
+
+function PreciosPanel() {
   const [precios, setPrecios] = useState<PrecioRow[]>([]);
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loginError, setLoginError] = useState("");
   const [savedId, setSavedId] = useState<string | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!supabase) {
-      setLoading(false);
-      return;
-    }
-    supabase.auth.getSession().then(({ data }) => {
-      setSession(data.session);
-      setLoading(false);
-    });
-    const { data: sub } = supabase.auth.onAuthStateChange((_event, s) => setSession(s));
-    return () => sub.subscription.unsubscribe();
-  }, []);
-
-  useEffect(() => {
-    if (!supabase || !session) return;
+    if (!supabase) return;
     supabase
       .from("precios")
       .select("id, label, monto_ars, monto_usd")
       .order("id")
       .then(({ data }) => setPrecios(data ?? []));
-  }, [session]);
-
-  async function handleLogin(e: React.FormEvent) {
-    e.preventDefault();
-    if (!supabase) return;
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) setLoginError(error.message);
-  }
+  }, []);
 
   async function handleSave(row: PrecioRow) {
     if (!supabase) return;
@@ -64,46 +43,6 @@ export default function AdminPage() {
     }
     setSavedId(row.id);
     setTimeout(() => setSavedId(null), 1500);
-  }
-
-  if (!supabase) {
-    return (
-      <div className="form-plain">
-        <div className="form-header">
-          <h1>Panel de administración</h1>
-          <p>
-            Todavía falta conectar el proyecto de Supabase (variables de entorno
-            NEXT_PUBLIC_SUPABASE_URL / NEXT_PUBLIC_SUPABASE_ANON_KEY). Una vez configurado, acá vas
-            a poder loguearte y editar los precios.
-          </p>
-        </div>
-      </div>
-    );
-  }
-
-  if (loading) return <div className="form-plain" />;
-
-  if (!session) {
-    return (
-      <div className="form-plain" style={{ maxWidth: 420 }}>
-        <div className="form-header">
-          <h1>Panel de administración</h1>
-          <p>Ingresá con tu cuenta de administrador.</p>
-        </div>
-        <form onSubmit={handleLogin}>
-          <div className="form-group">
-            <label className="required">Email</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-          </div>
-          <div className="form-group">
-            <label className="required">Contraseña</label>
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-          </div>
-          {loginError && <p style={{ color: "#ff6666", fontSize: "0.85rem" }}>{loginError}</p>}
-          <button type="submit" className="btn-primary" style={{ width: "100%" }}>Ingresar</button>
-        </form>
-      </div>
-    );
   }
 
   return (

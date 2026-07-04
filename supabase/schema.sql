@@ -75,6 +75,12 @@ create table if not exists compras (
   pasarela text,                          -- mercadopago | stripe
   monto numeric,
 
+  -- "enviado" es un estado de CUMPLIMIENTO (¿ya le entregué el pedido al
+  -- cliente?), distinto de "estado" (que es de pago/formulario). El admin
+  -- lo tilda a mano desde /admin/pedidos una vez que preparó y envió el pedido.
+  enviado boolean not null default false,
+  enviado_en timestamptz,
+
   creado_en timestamptz not null default now(),
   pagado_en timestamptz,
   completado_en timestamptz
@@ -129,13 +135,12 @@ create policy "newsletter: alta pública" on newsletter_subscribers for insert w
 
 alter table compras enable row level security;
 create policy "compras: alta pública" on compras for insert with check (true);
--- El link de regalo funciona como "magic link": el UUID del token es el secreto.
--- Permitimos SELECT/UPDATE público porque la app siempre filtra por token exacto
--- (nadie puede listar compras sin conocerlo). Si más adelante se agrega un login
--- de administrador, esto se puede restringir más y mover la lectura general a
--- una ruta server-side con la service_role key.
-create policy "compras: lectura por token" on compras for select using (true);
-create policy "compras: completar por token" on compras for update using (true) with check (true);
+-- El panel /admin/pedidos y el flujo de "completar regalo" por token corren
+-- del lado del servidor con la service_role key (que ignora RLS por diseño),
+-- validando el token o la sesión de admin en el código de la ruta — por eso
+-- NO hay políticas públicas de SELECT/UPDATE acá. Antes existían con
+-- USING(true), lo cual dejaba listar/editar cualquier pedido a quien tuviera
+-- la anon key; se retiraron a propósito.
 
 alter table testimonios enable row level security;
 create policy "testimonios: alta pública" on testimonios for insert with check (true);
@@ -152,5 +157,9 @@ grant select on precios to anon, authenticated;
 grant update on precios to authenticated;
 grant insert on consultas to anon, authenticated;
 grant insert on newsletter_subscribers to anon, authenticated;
-grant insert, select, update on compras to anon, authenticated;
+grant insert on compras to anon;
 grant insert, select on testimonios to anon, authenticated;
+
+-- service_role (usado solo del lado del servidor, nunca en el navegador) ya
+-- ignora RLS, pero igual necesita el GRANT de tabla para poder tocarlas.
+grant all on compras, precios, testimonios, consultas, newsletter_subscribers to service_role;

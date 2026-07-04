@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
-import { supabase } from "@/lib/supabase";
 import { formDataToObject } from "@/lib/formData";
 import PersonalDataFields from "@/components/forms/PersonalDataFields";
 import ComoSupisteField from "@/components/forms/ComoSupisteField";
@@ -28,30 +27,27 @@ export default function CompletarRegaloPage() {
 
   useEffect(() => {
     async function load() {
-      if (!supabase) {
+      const res = await fetch(`/api/gift/${token}`);
+      if (!res.ok) {
         setCompra(null);
         return;
       }
-      const { data } = await supabase
-        .from("compras")
-        .select("servicio, estado, destinatario_email")
-        .eq("token", token)
-        .maybeSingle();
-      setCompra((data as Compra) ?? null);
+      const { compra } = await res.json();
+      setCompra(compra as Compra);
     }
     load();
   }, [token]);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
-    if (!supabase) return;
     const datos = formDataToObject(new FormData(e.currentTarget));
-    const { error } = await supabase
-      .from("compras")
-      .update({ datos, estado: "completado", completado_en: new Date().toISOString() })
-      .eq("token", token);
-    if (error) {
-      console.error("completar regalo update failed:", error);
+    const res = await fetch(`/api/gift/${token}/completar`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(datos),
+    });
+    if (!res.ok) {
+      console.error("completar regalo update failed:", await res.text());
       setStatus("error");
       return;
     }
