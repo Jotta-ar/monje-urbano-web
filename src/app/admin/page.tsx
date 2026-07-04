@@ -158,7 +158,7 @@ function PreciosPanel() {
 function PedidosPanel({ session }: { session: Session }) {
   const [pedidos, setPedidos] = useState<Pedido[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [soloPendientes, setSoloPendientes] = useState(true);
+  const [subTab, setSubTab] = useState<"pendientes" | "completados">("pendientes");
   const token = session.access_token;
 
   async function cargar() {
@@ -209,29 +209,43 @@ function PedidosPanel({ session }: { session: Session }) {
     URL.revokeObjectURL(url);
   }
 
-  const visibles = pedidos?.filter((p) => !soloPendientes || !p.enviado) ?? [];
+  const pendientes = pedidos?.filter((p) => !p.enviado) ?? [];
+  const completados = pedidos?.filter((p) => p.enviado) ?? [];
+  const visibles = subTab === "pendientes" ? pendientes : completados;
 
   return (
     <div>
       <div className="form-header">
         <h1>Pedidos</h1>
-        <p>Todos los pedidos recibidos. Tildá &quot;Enviado&quot; cuando ya lo entregaste.</p>
+        <p>Tildá &quot;Enviado&quot; cuando ya lo entregaste — pasa solo a &quot;Completados&quot;.</p>
       </div>
 
       {error && <p style={{ color: "#ff6666", fontSize: "0.85rem", marginBottom: 16 }}>{error}</p>}
 
-      <label style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20, fontSize: "0.9rem", color: "#ccc" }}>
-        <input
-          type="checkbox"
-          checked={soloPendientes}
-          onChange={(e) => setSoloPendientes(e.target.checked)}
-        />
-        Mostrar solo los pendientes de enviar
-      </label>
+      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+        <button
+          type="button"
+          className={subTab === "pendientes" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "6px 18px", fontSize: "0.85rem" }}
+          onClick={() => setSubTab("pendientes")}
+        >
+          Pendientes ({pendientes.length})
+        </button>
+        <button
+          type="button"
+          className={subTab === "completados" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "6px 18px", fontSize: "0.85rem" }}
+          onClick={() => setSubTab("completados")}
+        >
+          Completados ({completados.length})
+        </button>
+      </div>
 
       {pedidos === null && <p style={{ color: "#888" }}>Cargando…</p>}
       {pedidos !== null && visibles.length === 0 && (
-        <p style={{ color: "#888" }}>No hay pedidos {soloPendientes ? "pendientes" : "todavía"}.</p>
+        <p style={{ color: "#888" }}>
+          {subTab === "pendientes" ? "No hay pedidos pendientes. ✨" : "Todavía no completaste ningún pedido."}
+        </p>
       )}
 
       {visibles.map((p) => {
