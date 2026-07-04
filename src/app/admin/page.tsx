@@ -311,6 +311,7 @@ function RegalarPanel({ session }: { session: Session }) {
   const [destinatarioNombre, setDestinatarioNombre] = useState("");
   const [destinatarioApellido, setDestinatarioApellido] = useState("");
   const [destinatarioEmail, setDestinatarioEmail] = useState("");
+  const [destinatarioWhatsapp, setDestinatarioWhatsapp] = useState("");
   const [motivo, setMotivo] = useState("");
   const [link, setLink] = useState<string | null>(null);
   const [copiado, setCopiado] = useState(false);
@@ -325,7 +326,14 @@ function RegalarPanel({ session }: { session: Session }) {
     const res = await fetch("/api/admin/regalos", {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({ servicio, destinatarioNombre, destinatarioApellido, destinatarioEmail, motivo }),
+      body: JSON.stringify({
+        servicio,
+        destinatarioNombre,
+        destinatarioApellido,
+        destinatarioEmail,
+        destinatarioWhatsapp,
+        motivo,
+      }),
     });
     setCreando(false);
     if (!res.ok) {
@@ -358,12 +366,20 @@ function RegalarPanel({ session }: { session: Session }) {
 
       <form onSubmit={handleSubmit}>
         <div className="form-group">
-          <label>Servicio</label>
-          <select value={servicio} onChange={(e) => setServicio(e.target.value)}>
+          <label className="required">Servicio</label>
+          <div className="checkbox-group" style={{ marginTop: 4 }}>
             {SERVICIOS_REGALABLES.map((s) => (
-              <option key={s.id} value={s.id}>{s.label}</option>
+              <label key={s.id} style={{ cursor: "pointer" }}>
+                <input
+                  type="radio"
+                  name="servicio-regalo"
+                  checked={servicio === s.id}
+                  onChange={() => setServicio(s.id)}
+                />
+                <span>{s.label}</span>
+              </label>
             ))}
-          </select>
+          </div>
         </div>
 
         <div className="form-row">
@@ -377,11 +393,31 @@ function RegalarPanel({ session }: { session: Session }) {
           </div>
         </div>
 
-        <div className="form-group">
-          <label>Email del destinatario (opcional)</label>
-          <input type="email" value={destinatarioEmail} onChange={(e) => setDestinatarioEmail(e.target.value)} />
-          <p className="hint">Solo para tu registro — el link lo enviás vos por donde prefieras.</p>
+        <div className="form-row">
+          <div className="form-group">
+            <label className="required">Email del destinatario</label>
+            <input
+              type="email"
+              required
+              value={destinatarioEmail}
+              onChange={(e) => setDestinatarioEmail(e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label className="required">WhatsApp del destinatario</label>
+            <input
+              type="tel"
+              required
+              placeholder="+54 9 11 ..."
+              value={destinatarioWhatsapp}
+              onChange={(e) => setDestinatarioWhatsapp(e.target.value)}
+            />
+          </div>
         </div>
+        <p className="hint" style={{ marginTop: -10, marginBottom: 18 }}>
+          Por ahora el link lo enviás vos a mano por el canal que prefieras — más adelante vamos a
+          poder mandarlo automático a estos datos.
+        </p>
 
         <div className="form-group">
           <label>Motivo (opcional, solo para vos)</label>

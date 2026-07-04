@@ -17,10 +17,23 @@ export async function POST(req: NextRequest) {
   }
 
   const body = await req.json();
-  const { servicio, destinatarioNombre, destinatarioApellido, destinatarioEmail, motivo } = body;
+  const {
+    servicio,
+    destinatarioNombre,
+    destinatarioApellido,
+    destinatarioEmail,
+    destinatarioWhatsapp,
+    motivo,
+  } = body;
 
   if (!SERVICIOS_VALIDOS.includes(servicio)) {
     return NextResponse.json({ error: "Servicio inválido" }, { status: 400 });
+  }
+  if (!destinatarioEmail || !destinatarioWhatsapp) {
+    return NextResponse.json(
+      { error: "Email y WhatsApp del destinatario son obligatorios" },
+      { status: 400 }
+    );
   }
 
   const { data, error } = await supabaseAdmin
@@ -33,7 +46,8 @@ export async function POST(req: NextRequest) {
       comprador_apellido: "(regalo interno)",
       destinatario_nombre: destinatarioNombre || null,
       destinatario_apellido: destinatarioApellido || null,
-      destinatario_email: destinatarioEmail || null,
+      destinatario_email: destinatarioEmail,
+      destinatario_whatsapp: destinatarioWhatsapp,
       como_supiste: motivo || null,
       moneda: "ARS",
       monto: 0,

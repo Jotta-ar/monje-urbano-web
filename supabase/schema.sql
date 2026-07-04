@@ -74,6 +74,7 @@ create table if not exists compras (
   destinatario_nombre text,
   destinatario_apellido text,
   destinatario_email text,
+  destinatario_whatsapp text,
 
   datos jsonb,                            -- respuestas del formulario de contenido
   como_supiste text,
