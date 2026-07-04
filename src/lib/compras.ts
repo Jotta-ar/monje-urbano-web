@@ -20,21 +20,21 @@ export interface NuevaCompra {
 }
 
 /**
- * Creates the pending order row. Returns the generated token (used to build
- * the /completar/[token] gift link). `token` is null either because Supabase
- * isn't configured yet (site keeps working end-to-end without a backend
- * wired up — `error` stays null in that case) or because the insert actually
- * failed (`error` holds the message so the caller can show a real error
- * instead of a false "success").
+ * Creates the pending order row using the public anon key. `token` always
+ * comes back null here on purpose: anon has INSERT-only access to compras
+ * (no SELECT), by design, so nobody can list or read back other people's
+ * orders with the public key — the token/link for the gift flow gets
+ * generated and sent server-side later (once the email automation is wired
+ * up), not exposed to the buyer's browser. Callers should only check
+ * `error`.
  */
 export async function crearCompra(
   input: NuevaCompra
 ): Promise<{ token: string | null; error: string | null }> {
   if (!supabase) return { token: null, error: null };
 
-  const { data, error } = await supabase
-    .from("compras")
-    .insert({
+  try {
+    const { error } = await supabase.from("compras").insert({
       servicio: input.servicio,
       modalidad: input.modalidad,
       es_regalo: input.esRegalo,
@@ -50,13 +50,18 @@ export async function crearCompra(
       como_supiste: input.comoSupiste,
       moneda: input.moneda,
       monto: input.monto,
-    })
-    .select("token")
-    .single();
+    });
 
-  if (error) {
-    console.error("crearCompra insert failed:", error);
-    return { token: null, error: error.message };
+    if (error) {
+      console.error("crearCompra insert failed:", error);
+      return { token: null, error: error.message };
+    }
+    return { token: null, error: null };
+  } catch (err) {
+    // Un fetch que revienta (red caída, timeout, etc.) tira una excepción en
+    // vez de devolver { error } — sin este catch, quien llama a crearCompra
+    // se queda esperando para siempre porque nunca vuelve una respuesta.
+    console.error("crearCompra threw:", err);
+    return { token: null, error: "Fallo de conexión al crear el pedido" };
   }
-  return { token: (data?.token as string) ?? null, error: null };
 }

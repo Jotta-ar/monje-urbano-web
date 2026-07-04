@@ -323,25 +323,32 @@ function RegalarPanel({ session }: { session: Session }) {
     setError(null);
     setCreando(true);
     setLink(null);
-    const res = await fetch("/api/admin/regalos", {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
-      body: JSON.stringify({
-        servicio,
-        destinatarioNombre,
-        destinatarioApellido,
-        destinatarioEmail,
-        destinatarioWhatsapp,
-        motivo,
-      }),
-    });
-    setCreando(false);
-    if (!res.ok) {
-      setError("No se pudo generar el link. Probá de nuevo.");
-      return;
+    try {
+      const res = await fetch("/api/admin/regalos", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({
+          servicio,
+          destinatarioNombre,
+          destinatarioApellido,
+          destinatarioEmail,
+          destinatarioWhatsapp,
+          motivo,
+        }),
+      });
+      if (!res.ok) {
+        const body = await res.json().catch(() => null);
+        setError(body?.error ?? "No se pudo generar el link. Probá de nuevo.");
+        return;
+      }
+      const { token } = await res.json();
+      setLink(`${window.location.origin}/completar/${token}`);
+    } catch (err) {
+      console.error("crear regalo failed:", err);
+      setError("No se pudo generar el link (problema de conexión). Probá de nuevo.");
+    } finally {
+      setCreando(false);
     }
-    const { token } = await res.json();
-    setLink(`${window.location.origin}/completar/${token}`);
   }
 
   function copiar() {
@@ -367,7 +374,7 @@ function RegalarPanel({ session }: { session: Session }) {
       <form onSubmit={handleSubmit}>
         <div className="form-group">
           <label className="required">Servicio</label>
-          <div className="checkbox-group" style={{ marginTop: 4 }}>
+          <div className="radio-group" style={{ marginTop: 4 }}>
             {SERVICIOS_REGALABLES.map((s) => (
               <label key={s.id} style={{ cursor: "pointer" }}>
                 <input

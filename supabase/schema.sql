@@ -172,3 +172,6 @@ grant insert, select on testimonios to anon, authenticated;
 -- service_role (usado solo del lado del servidor, nunca en el navegador) ya
 -- ignora RLS, pero igual necesita el GRANT de tabla para poder tocarlas.
 grant all on compras, precios, testimonios, consultas, newsletter_subscribers to service_role;
+-- El default de "numero" llama nextval() al insertar — sin este permiso
+-- explícito, CUALQUIER insert en compras falla (tanto anon como service_role).
+grant usage on sequence compras_numero_seq to anon, service_role;

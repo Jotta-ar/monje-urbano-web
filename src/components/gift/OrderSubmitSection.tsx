@@ -29,21 +29,25 @@ export default function OrderSubmitSection({
     const fd = new FormData(form);
     const datos = formDataToObject(fd);
 
-    const { error } = await crearCompra({
-      servicio,
-      modalidad: modalidadField ? (datos[modalidadField] as string) : undefined,
-      esRegalo: mode === "regalar",
-      datos: mode === "vos" ? datos : undefined,
-      compradorNombre: mode === "vos" ? (datos["nombre"] as string) : undefined,
-      compradorApellido: mode === "vos" ? (datos["apellido"] as string) : undefined,
-      compradorEmail: (mode === "vos" ? datos["email"] : datos["comprador_email"]) as string,
-      compradorWhatsapp: mode === "vos" ? (datos["whatsapp"] as string) : undefined,
-      destinatarioEmail: mode === "regalar" ? (datos["destinatario_email"] as string) : undefined,
-      comoSupiste: datos["como_supiste"] as string | undefined,
-      moneda,
-    });
-
-    setStatus(error ? "error" : "listo");
+    try {
+      const { error } = await crearCompra({
+        servicio,
+        modalidad: modalidadField ? (datos[modalidadField] as string) : undefined,
+        esRegalo: mode === "regalar",
+        datos: mode === "vos" ? datos : undefined,
+        compradorNombre: mode === "vos" ? (datos["nombre"] as string) : undefined,
+        compradorApellido: mode === "vos" ? (datos["apellido"] as string) : undefined,
+        compradorEmail: (mode === "vos" ? datos["email"] : datos["comprador_email"]) as string,
+        compradorWhatsapp: mode === "vos" ? (datos["whatsapp"] as string) : undefined,
+        destinatarioEmail: mode === "regalar" ? (datos["destinatario_email"] as string) : undefined,
+        comoSupiste: datos["como_supiste"] as string | undefined,
+        moneda,
+      });
+      setStatus(error ? "error" : "listo");
+    } catch (err) {
+      console.error("handlePagar failed:", err);
+      setStatus("error");
+    }
   }
 
   if (status === "error") {
