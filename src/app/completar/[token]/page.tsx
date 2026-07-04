@@ -18,6 +18,17 @@ const SERVICIO_INFO: Record<string, { titulo: string; Fields: React.ComponentTyp
   ritual_matutino: { titulo: "Ritual Matutino Personalizado", Fields: RitualMatutinoFields },
 };
 
+const MENSAJE_CONFIRMACION: Record<string, string> = {
+  magia_sanadora:
+    "Tu pedido de Magia Sanadora fue recibido. Voy a revisar tu intención y coordinar con vos el inicio de las sesiones.",
+  manifiesto:
+    "Tu pedido de Manifiesto Personalizado fue recibido. Voy a revisar tu historia y los datos compartidos para comenzar el proceso.",
+  ritual_matutino:
+    "Tu pedido de Ritual Matutino fue recibido. Voy a revisar tu momento actual para preparar una práctica simple, concreta y posible.",
+  cartografia:
+    "Tu pedido de Cartografía del Síntoma fue recibido. Voy a revisar lo que compartiste para trabajar la lectura simbólica y el ritual correspondiente.",
+};
+
 type Compra = { servicio: string; estado: string; destinatario_email: string | null };
 
 export default function CompletarRegaloPage() {
@@ -96,9 +107,19 @@ export default function CompletarRegaloPage() {
     return (
       <div className="form-plain">
         <div className="form-header">
-          <h1>¡Gracias por compartir tu momento!</h1>
-          <p>Tu semilla fue recibida. Ya me pongo en marcha con tu pedido.</p>
+          <h1>¡Gracias por confiar!</h1>
+          <p>Tu pedido fue recibido.</p>
         </div>
+        <p style={{ textAlign: "center", color: "#ccc", maxWidth: 480, margin: "0 auto 20px" }}>
+          {MENSAJE_CONFIRMACION[compra.servicio]}
+        </p>
+        <p style={{ textAlign: "center", color: "#999", maxWidth: 480, margin: "0 auto 28px" }}>
+          Me voy a comunicar con vos por WhatsApp o correo para confirmar los detalles y coordinar
+          el inicio del proceso.
+        </p>
+        <p style={{ textAlign: "center", fontFamily: "var(--font-pirata-one)", color: "#eee", fontSize: "1.1rem" }}>
+          Silencio, presencia y propósito.
+        </p>
       </div>
     );
   }

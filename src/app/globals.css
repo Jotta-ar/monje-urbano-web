@@ -796,13 +796,55 @@ fieldset {
   margin-bottom: 8px;
 }
 
+/* Estilo propio (no nativo) para que marcado/desmarcado se distinga clarísimo
+   en cualquier navegador o celular — el accent-color nativo se ve casi igual
+   en ambos estados en algunos dispositivos. */
 .checkbox-group input[type="checkbox"],
 .radio-group input[type="radio"] {
+  appearance: none;
+  -webkit-appearance: none;
   width: 18px;
   height: 18px;
   margin-top: 2px;
   flex-shrink: 0;
-  accent-color: #fff;
+  border: 1.5px solid rgba(255, 255, 255, 0.35);
+  background: rgba(255, 255, 255, 0.04);
+  border-radius: 4px;
+  position: relative;
+  cursor: pointer;
+}
+
+.radio-group input[type="radio"] {
+  border-radius: 50%;
+}
+
+.checkbox-group input[type="checkbox"]:checked,
+.radio-group input[type="radio"]:checked {
+  background: #fff;
+  border-color: #fff;
+}
+
+.checkbox-group input[type="checkbox"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 1px;
+  width: 5px;
+  height: 9px;
+  border: solid #0a0a0a;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+.radio-group input[type="radio"]:checked::after {
+  content: "";
+  position: absolute;
+  left: 4px;
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #0a0a0a;
 }
 
 .checkbox-legal {
