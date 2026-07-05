@@ -796,19 +796,23 @@ fieldset {
   margin-bottom: 8px;
 }
 
-/* Estilo propio (no nativo) para que marcado/desmarcado se distinga clarísimo
-   en cualquier navegador o celular — el accent-color nativo se ve casi igual
-   en ambos estados en algunos dispositivos. */
-.checkbox-group input[type="checkbox"],
-.radio-group input[type="radio"] {
+/* Estilo propio (no nativo), clásico: casillero/círculo blanco siempre
+   visible, con la tilde o el punto negro apareciendo adentro al marcar —
+   así se distingue clarísimo en cualquier navegador o dispositivo. */
+.form-plain .checkbox-group input[type="checkbox"],
+.form-plain .radio-group input[type="radio"] {
   appearance: none;
   -webkit-appearance: none;
   width: 18px;
   height: 18px;
+  padding-top: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-left: 0;
   margin-top: 2px;
   flex-shrink: 0;
-  border: 1.5px solid rgba(255, 255, 255, 0.35);
-  background: rgba(255, 255, 255, 0.04);
+  border: 1.5px solid rgba(255, 255, 255, 0.4);
+  background: #fff;
   border-radius: 4px;
   position: relative;
   cursor: pointer;
@@ -816,12 +820,6 @@ fieldset {
 
 .radio-group input[type="radio"] {
   border-radius: 50%;
-}
-
-.checkbox-group input[type="checkbox"]:checked,
-.radio-group input[type="radio"]:checked {
-  background: #fff;
-  border-color: #fff;
 }
 
 .checkbox-group input[type="checkbox"]:checked::after {
