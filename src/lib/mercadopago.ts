@@ -27,6 +27,11 @@ export async function mpFetch<T>(
     method: "POST",
     headers: {
       "Content-Type": "application/json",
+      // El gateway de Supabase exige un Authorization con un JWT/anon key
+      // válido antes de dejar pasar la request a la función, sin importar
+      // el "x-proxy-secret" propio de acá abajo. La anon key ya es pública
+      // (se manda al navegador en el resto del sitio), no es un secreto.
+      Authorization: `Bearer ${process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY}`,
       "x-proxy-secret": PROXY_SECRET,
     },
     body: JSON.stringify({
