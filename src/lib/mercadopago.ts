@@ -1,31 +1,39 @@
 import "server-only";
 
-const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN?.trim();
+const PROXY_URL = process.env.MP_PROXY_URL?.trim();
+const PROXY_SECRET = process.env.MP_PROXY_SECRET?.trim();
 
-export const MP_ACCESS_TOKEN = accessToken || null;
+export const MP_CONFIGURED = !!(PROXY_URL && PROXY_SECRET);
 
 /**
- * Llama directamente a la API REST de Mercado Pago con fetch, en vez de usar
- * el SDK oficial: el SDK a veces intenta parsear como JSON una respuesta
- * vacía (típico en errores 4xx) y explota con "Unexpected end of JSON
- * input" en vez de mostrar el error real. Acá leemos el body como texto
- * primero, así siempre podemos loguear o devolver el motivo verdadero.
+ * Llama a la API de Mercado Pago a través de una Edge Function de Supabase
+ * (supabase/functions/mp-proxy) en vez de directo desde acá: confirmado con
+ * pruebas manuales que Mercado Pago devuelve un 403 sin body a cualquier
+ * request que salga desde la infraestructura de Vercel (probamos función
+ * Node y función Edge, mismo resultado), mientras que el mismo request
+ * exacto funciona perfecto llamado desde afuera de Vercel — es un bloqueo
+ * de reputación de IP del lado de Mercado Pago, no un problema de nuestro
+ * código. La función de Supabase corre en otra red (Deno Deploy) y hace la
+ * llamada real, autenticada con el access token que vive ahí como secret.
  */
 export async function mpFetch<T>(
   path: string,
   init: RequestInit = {}
 ): Promise<{ ok: boolean; status: number; data: T | null; raw: string }> {
-  const res = await fetch(`https://api.mercadopago.com${path}`, {
-    ...init,
+  if (!PROXY_URL || !PROXY_SECRET) {
+    throw new Error("MP_PROXY_URL / MP_PROXY_SECRET no configurados");
+  }
+  const res = await fetch(PROXY_URL, {
+    method: "POST",
     headers: {
-      Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       "Content-Type": "application/json",
-      // fetch en Node no manda User-Agent por defecto; sin uno, el firewall
-      // de Mercado Pago rechaza la request con un 403 vacío (sin body).
-      "User-Agent": "MonjeUrbanoLibre/1.0",
-      Accept: "application/json",
-      ...init.headers,
+      "x-proxy-secret": PROXY_SECRET,
     },
+    body: JSON.stringify({
+      path,
+      method: init.method ?? "GET",
+      bodyRaw: typeof init.body === "string" ? init.body : undefined,
+    }),
   });
   const raw = await res.text();
   let data: T | null = null;

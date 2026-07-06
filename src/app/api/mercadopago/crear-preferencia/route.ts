@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MP_ACCESS_TOKEN, mpFetch, precioIdPara } from "@/lib/mercadopago";
+import { MP_CONFIGURED, mpFetch, precioIdPara } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireAdmin } from "@/lib/admin-auth";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
-
-// Mercado Pago devuelve 403 (sin body) a las llamadas server-to-server que
-// salen desde la red de funciones Node/Lambda de Vercel en EE.UU. Correr esto
-// como función Edge (red distinta, no AWS Lambda) evita ese bloqueo, y de paso
-// preferimos São Paulo por cercanía. El plan Hobby no permite elegir región
-// para funciones Node normales, pero sí corre Edge Functions sin costo extra.
-export const runtime = "edge";
-export const preferredRegion = "gru1";
 
 /**
  * Crea una preferencia de pago de Mercado Pago y devuelve la URL de checkout.
@@ -26,7 +18,7 @@ export const preferredRegion = "gru1";
  *   servicios reales. Requiere sesión de admin.
  */
 export async function POST(req: NextRequest) {
-  if (!MP_ACCESS_TOKEN || !supabaseAdmin) {
+  if (!MP_CONFIGURED || !supabaseAdmin) {
     return NextResponse.json({ error: "Mercado Pago no está configurado" }, { status: 500 });
   }
 
@@ -137,12 +129,7 @@ export async function POST(req: NextRequest) {
       `Mercado Pago devolvió un error creando la preferencia (status ${resultado.status}):`,
       resultado.raw
     );
-    // @ts-expect-error diagnóstico temporal: confirmar en qué runtime corrió esto
-    const runtimeReal = typeof EdgeRuntime !== "undefined" ? "edge" : "node";
-    return NextResponse.json(
-      { error: "Mercado Pago rechazó la preferencia de pago", _debugRuntime: runtimeReal, _debugStatus: resultado.status },
-      { status: 502 }
-    );
+    return NextResponse.json({ error: "Mercado Pago rechazó la preferencia de pago" }, { status: 502 });
   }
 
   return NextResponse.json({ initPoint: resultado.data.init_point });

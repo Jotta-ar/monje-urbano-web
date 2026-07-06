@@ -1,22 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
-import { MP_ACCESS_TOKEN, mpFetch } from "@/lib/mercadopago";
+import { MP_CONFIGURED, mpFetch } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
-
-// Esta ruta también le pregunta a la API de Mercado Pago por el pago real
-// (ver abajo), así que corre como función Edge por el mismo motivo que
-// crear-preferencia — ver el comentario ahí.
-export const runtime = "edge";
-export const preferredRegion = "gru1";
 
 /**
  * Mercado Pago llama a esta URL cada vez que cambia el estado de un pago.
  * El body de la notificación en sí NO se usa para decidir nada (se puede
  * falsificar) — solo nos dice "revisá el pago X". Con ese id, le volvemos a
- * preguntar a la API de Mercado Pago (autenticados con nuestro access token)
- * cuál es el estado real, y recién ahí actualizamos la base.
+ * preguntar a la API de Mercado Pago (a través de mp-proxy en Supabase, ver
+ * src/lib/mercadopago.ts) cuál es el estado real, y recién ahí actualizamos
+ * la base.
  */
 export async function POST(req: NextRequest) {
-  if (!MP_ACCESS_TOKEN || !supabaseAdmin) {
+  if (!MP_CONFIGURED || !supabaseAdmin) {
     return NextResponse.json({ error: "No configurado" }, { status: 500 });
   }
 
