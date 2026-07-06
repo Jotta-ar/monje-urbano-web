@@ -30,7 +30,7 @@ export default function OrderSubmitSection({
     const datos = formDataToObject(fd);
 
     try {
-      const { error } = await crearCompra({
+      const { id, error } = await crearCompra({
         servicio,
         modalidad: modalidadField ? (datos[modalidadField] as string) : undefined,
         esRegalo: mode === "regalar",
@@ -43,7 +43,31 @@ export default function OrderSubmitSection({
         comoSupiste: datos["como_supiste"] as string | undefined,
         moneda,
       });
-      setStatus(error ? "error" : "listo");
+
+      if (error || !id) {
+        setStatus("error");
+        return;
+      }
+
+      if (moneda !== "ARS") {
+        // El pago en USD todavía no tiene pasarela conectada.
+        setStatus("listo");
+        return;
+      }
+
+      const resp = await fetch("/api/mercadopago/crear-preferencia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ compraId: id }),
+      });
+      const data = await resp.json();
+      if (!resp.ok || !data.initPoint) {
+        console.error("crear-preferencia failed:", data.error);
+        setStatus("error");
+        return;
+      }
+
+      window.location.href = data.initPoint;
     } catch (err) {
       console.error("handlePagar failed:", err);
       setStatus("error");

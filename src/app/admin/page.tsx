@@ -50,7 +50,7 @@ export default function AdminPage() {
 }
 
 function AdminTabs({ session }: { session: Session }) {
-  const [tab, setTab] = useState<"precios" | "pedidos" | "regalar">("pedidos");
+  const [tab, setTab] = useState<"precios" | "pedidos" | "regalar" | "pago-prueba">("pedidos");
 
   return (
     <div className="form-plain" style={{ maxWidth: 1000 }}>
@@ -79,11 +79,64 @@ function AdminTabs({ session }: { session: Session }) {
         >
           Precios
         </button>
+        <button
+          type="button"
+          className={tab === "pago-prueba" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("pago-prueba")}
+        >
+          Pago de prueba
+        </button>
       </div>
 
       {tab === "pedidos" && <PedidosPanel session={session} />}
       {tab === "regalar" && <RegalarPanel session={session} />}
       {tab === "precios" && <PreciosPanel />}
+      {tab === "pago-prueba" && <PagoPruebaPanel session={session} />}
+    </div>
+  );
+}
+
+function PagoPruebaPanel({ session }: { session: Session }) {
+  const [status, setStatus] = useState<"idle" | "creando" | "error">("idle");
+  const [error, setError] = useState<string | null>(null);
+
+  async function handleProbar() {
+    setStatus("creando");
+    setError(null);
+    try {
+      const res = await fetch("/api/mercadopago/crear-preferencia", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${session.access_token}` },
+        body: JSON.stringify({}),
+      });
+      const data = await res.json();
+      if (!res.ok || !data.initPoint) {
+        setError(data.error ?? "Error desconocido");
+        setStatus("error");
+        return;
+      }
+      window.location.href = data.initPoint;
+    } catch (err) {
+      console.error("pago de prueba falló:", err);
+      setError("Fallo de conexión");
+      setStatus("error");
+    }
+  }
+
+  return (
+    <div>
+      <h2 style={{ marginBottom: 12 }}>Pago de prueba — $1 ARS</h2>
+      <p style={{ color: "#999", maxWidth: 560, marginBottom: 20 }}>
+        Sirve para confirmar que la integración con Mercado Pago funciona de punta a punta (se crea
+        la preferencia, se completa el pago, y el webhook responde) antes de habilitarla en los
+        botones de compra reales. Usá las tarjetas de prueba de Mercado Pago si estás con las
+        credenciales de TEST — no se cobra nada real.
+      </p>
+      <button type="button" className="btn-primary" onClick={handleProbar} disabled={status === "creando"}>
+        {status === "creando" ? "Generando…" : "Pagar $1 de prueba"}
+      </button>
+      {error && <p style={{ color: "#e88", marginTop: 12 }}>{error}</p>}
     </div>
   );
 }
