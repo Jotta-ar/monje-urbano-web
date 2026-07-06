@@ -3,8 +3,9 @@ import { MP_ACCESS_TOKEN, mpFetch } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 // Esta ruta también le pregunta a la API de Mercado Pago por el pago real
-// (ver abajo), así que corre desde la misma región que crear-preferencia
-// para evitar el mismo bloqueo de IPs de datacenters en EE.UU.
+// (ver abajo), así que corre como función Edge por el mismo motivo que
+// crear-preferencia — ver el comentario ahí.
+export const runtime = "edge";
 export const preferredRegion = "gru1";
 
 /**
