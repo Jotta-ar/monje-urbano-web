@@ -223,6 +223,12 @@ function PedidosPanel({ session }: { session: Session }) {
   const completados = pedidos?.filter((p) => p.enviado) ?? [];
   const visibles = subTab === "pendientes" ? pendientes : completados;
 
+  // Dentro de "Pendientes", separar lo que ya tiene el formulario completo
+  // (listo para trabajar) de los regalos generados que todavía esperan que
+  // el beneficiario complete su formulario.
+  const paraHacer = visibles.filter((p) => p.estado === "completado");
+  const regalosPendientes = visibles.filter((p) => p.estado !== "completado");
+
   return (
     <div>
       <div className="form-header">
@@ -258,43 +264,88 @@ function PedidosPanel({ session }: { session: Session }) {
         </p>
       )}
 
-      {visibles.map((p) => {
-        const nombre = p.es_regalo
-          ? `${p.destinatario_nombre ?? "?"} ${p.destinatario_apellido ?? ""} (regalo de ${p.comprador_nombre ?? "?"})`
-          : `${p.comprador_nombre ?? "?"} ${p.comprador_apellido ?? ""}`;
-        return (
-          <div
-            key={p.id}
-            className="form-section"
-            style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}
-          >
-            <div>
-              <h2 style={{ fontSize: "1.05rem", marginBottom: 4 }}>
-                #{String(p.numero).padStart(6, "0")} — {SERVICIO_LABELS[p.servicio] ?? p.servicio}
-                {p.modalidad ? ` — ${p.modalidad}` : ""}
-              </h2>
-              <p style={{ color: "#999", fontSize: "0.85rem", margin: 0 }}>{nombre}</p>
-              <p style={{ color: "#777", fontSize: "0.8rem", margin: "4px 0 0" }}>
-                {ESTADO_LABELS[p.estado] ?? p.estado} · {new Date(p.creado_en).toLocaleString("es-AR")}
-                {p.monto ? ` · ${p.monto} ${p.moneda}` : ""}
+      {subTab === "pendientes" ? (
+        <>
+          {paraHacer.length > 0 && (
+            <>
+              <h3 style={{ fontSize: "0.95rem", color: "#ccc", margin: "0 0 12px" }}>
+                Pedidos para hacer ({paraHacer.length})
+              </h3>
+              {paraHacer.map((p) => (
+                <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} />
+              ))}
+            </>
+          )}
+
+          {regalosPendientes.length > 0 && (
+            <>
+              <h3 style={{ fontSize: "0.95rem", color: "#888", margin: paraHacer.length > 0 ? "28px 0 12px" : "0 0 12px" }}>
+                Regalos generados, esperando formulario ({regalosPendientes.length})
+              </h3>
+              <p style={{ color: "#777", fontSize: "0.8rem", marginTop: -6, marginBottom: 12 }}>
+                Todavía no llegan a tu lista de trabajo — si un regalo lleva varios días acá, reenviaselo al
+                destinatario desde la pestaña &quot;Regalar&quot; para recordarle completarlo.
               </p>
-            </div>
-            <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
-              <button type="button" className="btn-secondary" onClick={() => descargarPdf(p)}>
-                Descargar PDF
-              </button>
-              <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", color: "#ccc" }}>
-                <input
-                  type="checkbox"
-                  checked={p.enviado}
-                  onChange={(e) => marcarEnviado(p.id, e.target.checked)}
-                />
-                Enviado
-              </label>
-            </div>
-          </div>
-        );
-      })}
+              {regalosPendientes.map((p) => (
+                <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} />
+              ))}
+            </>
+          )}
+        </>
+      ) : (
+        visibles.map((p) => (
+          <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} />
+        ))
+      )}
+    </div>
+  );
+}
+
+function PedidoRow({
+  pedido: p,
+  onDescargarPdf,
+  onMarcarEnviado,
+}: {
+  pedido: Pedido;
+  onDescargarPdf: (pedido: Pedido) => void;
+  onMarcarEnviado: (id: string, enviado: boolean) => void;
+}) {
+  const nombre = p.es_regalo
+    ? `${p.destinatario_nombre ?? "?"} ${p.destinatario_apellido ?? ""} (regalo de ${p.comprador_nombre ?? "?"})`
+    : `${p.comprador_nombre ?? "?"} ${p.comprador_apellido ?? ""}`;
+  const formularioListo = p.estado === "completado";
+
+  return (
+    <div
+      className="form-section"
+      style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 12 }}
+    >
+      <div>
+        <h2 style={{ fontSize: "1.05rem", marginBottom: 4 }}>
+          #{String(p.numero).padStart(6, "0")} — {SERVICIO_LABELS[p.servicio] ?? p.servicio}
+          {p.modalidad ? ` — ${p.modalidad}` : ""}
+        </h2>
+        <p style={{ color: "#999", fontSize: "0.85rem", margin: 0 }}>{nombre}</p>
+        <p style={{ color: "#777", fontSize: "0.8rem", margin: "4px 0 0" }}>
+          {ESTADO_LABELS[p.estado] ?? p.estado} · {new Date(p.creado_en).toLocaleString("es-AR")}
+          {p.monto ? ` · ${p.monto} ${p.moneda}` : ""}
+        </p>
+      </div>
+      <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
+        <button type="button" className="btn-secondary" onClick={() => onDescargarPdf(p)}>
+          Descargar PDF
+        </button>
+        {formularioListo && (
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", color: "#ccc" }}>
+            <input
+              type="checkbox"
+              checked={p.enviado}
+              onChange={(e) => onMarcarEnviado(p.id, e.target.checked)}
+            />
+            Enviado
+          </label>
+        )}
+      </div>
     </div>
   );
 }
