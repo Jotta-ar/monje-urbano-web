@@ -85,7 +85,10 @@ export async function POST(req: NextRequest) {
     if (!userId) {
       return NextResponse.json({ error: "No autorizado" }, { status: 401 });
     }
-    amount = 1;
+    // $1 ARS puede quedar por debajo del mínimo que Mercado Pago acepta para
+    // pagos con tarjeta (con la inflación en Argentina, es un monto casi
+    // nulo) — se usa un monto real de servicio para la prueba.
+    amount = 30000;
     title = "Pago de prueba — Monje Urbano Libre";
     externalReference = crypto.randomUUID();
   }

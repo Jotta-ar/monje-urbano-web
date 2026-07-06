@@ -126,7 +126,7 @@ function PagoPruebaPanel({ session }: { session: Session }) {
 
   return (
     <div>
-      <h2 style={{ marginBottom: 12 }}>Pago de prueba — $1 ARS</h2>
+      <h2 style={{ marginBottom: 12 }}>Pago de prueba — $30.000 ARS</h2>
       <p style={{ color: "#999", maxWidth: 560, marginBottom: 20 }}>
         Sirve para confirmar que la integración con Mercado Pago funciona de punta a punta (se crea
         la preferencia, se completa el pago, y el webhook responde) antes de habilitarla en los
@@ -134,7 +134,7 @@ function PagoPruebaPanel({ session }: { session: Session }) {
         credenciales de TEST — no se cobra nada real.
       </p>
       <button type="button" className="btn-primary" onClick={handleProbar} disabled={status === "creando"}>
-        {status === "creando" ? "Generando…" : "Pagar $1 de prueba"}
+        {status === "creando" ? "Generando…" : "Pagar $30.000 de prueba"}
       </button>
       {error && <p style={{ color: "#e88", marginTop: 12 }}>{error}</p>}
     </div>
