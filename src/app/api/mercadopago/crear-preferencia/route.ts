@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Preference } from "mercadopago";
-import { mpClient, precioIdPara } from "@/lib/mercadopago";
+import { MP_ACCESS_TOKEN, mpFetch, precioIdPara } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { requireAdmin } from "@/lib/admin-auth";
 
@@ -19,7 +18,7 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
  *   servicios reales. Requiere sesión de admin.
  */
 export async function POST(req: NextRequest) {
-  if (!mpClient || !supabaseAdmin) {
+  if (!MP_ACCESS_TOKEN || !supabaseAdmin) {
     return NextResponse.json({ error: "Mercado Pago no está configurado" }, { status: 500 });
   }
 
@@ -96,11 +95,11 @@ export async function POST(req: NextRequest) {
   // y la vuelta al sitio queda manual (el checkout igual muestra un botón).
   const esLocal = SITE_URL.includes("localhost");
 
-  let result;
+  let resultado;
   try {
-    const preference = new Preference(mpClient);
-    result = await preference.create({
-      body: {
+    resultado = await mpFetch<{ init_point?: string }>("/checkout/preferences", {
+      method: "POST",
+      body: JSON.stringify({
         items: [
           {
             id: externalReference,
@@ -118,16 +117,20 @@ export async function POST(req: NextRequest) {
           failure: `${SITE_URL}/pedir/error`,
         },
         ...(esLocal ? {} : { auto_return: "approved" as const }),
-      },
+      }),
     });
   } catch (err) {
-    console.error("Mercado Pago preference.create falló:", err);
-    return NextResponse.json({ error: "No se pudo crear la preferencia de pago" }, { status: 502 });
+    console.error("Llamada a Mercado Pago (crear preferencia) falló:", err);
+    return NextResponse.json({ error: "No se pudo contactar a Mercado Pago" }, { status: 502 });
   }
 
-  if (!result.init_point) {
-    return NextResponse.json({ error: "Mercado Pago no devolvió una URL de pago" }, { status: 502 });
+  if (!resultado.ok || !resultado.data?.init_point) {
+    console.error(
+      `Mercado Pago devolvió un error creando la preferencia (status ${resultado.status}):`,
+      resultado.raw
+    );
+    return NextResponse.json({ error: "Mercado Pago rechazó la preferencia de pago" }, { status: 502 });
   }
 
-  return NextResponse.json({ initPoint: result.init_point });
+  return NextResponse.json({ initPoint: resultado.data.init_point });
 }

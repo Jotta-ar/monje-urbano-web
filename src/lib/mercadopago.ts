@@ -1,10 +1,39 @@
 import "server-only";
-import { MercadoPagoConfig } from "mercadopago";
 
-const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN;
+const accessToken = process.env.MERCADOPAGO_ACCESS_TOKEN?.trim();
 
-/** Server-only client. Never import this from a "use client" component. */
-export const mpClient = accessToken ? new MercadoPagoConfig({ accessToken }) : null;
+export const MP_ACCESS_TOKEN = accessToken || null;
+
+/**
+ * Llama directamente a la API REST de Mercado Pago con fetch, en vez de usar
+ * el SDK oficial: el SDK a veces intenta parsear como JSON una respuesta
+ * vacía (típico en errores 4xx) y explota con "Unexpected end of JSON
+ * input" en vez de mostrar el error real. Acá leemos el body como texto
+ * primero, así siempre podemos loguear o devolver el motivo verdadero.
+ */
+export async function mpFetch<T>(
+  path: string,
+  init: RequestInit = {}
+): Promise<{ ok: boolean; status: number; data: T | null; raw: string }> {
+  const res = await fetch(`https://api.mercadopago.com${path}`, {
+    ...init,
+    headers: {
+      Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
+      "Content-Type": "application/json",
+      ...init.headers,
+    },
+  });
+  const raw = await res.text();
+  let data: T | null = null;
+  if (raw) {
+    try {
+      data = JSON.parse(raw) as T;
+    } catch {
+      data = null;
+    }
+  }
+  return { ok: res.ok, status: res.status, data, raw };
+}
 
 /**
  * Maps a servicio + modalidad (as chosen in the order form) to the matching

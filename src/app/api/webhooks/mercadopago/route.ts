@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { Payment } from "mercadopago";
-import { mpClient } from "@/lib/mercadopago";
+import { MP_ACCESS_TOKEN, mpFetch } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
 /**
@@ -11,7 +10,7 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
  * cuál es el estado real, y recién ahí actualizamos la base.
  */
 export async function POST(req: NextRequest) {
-  if (!mpClient || !supabaseAdmin) {
+  if (!MP_ACCESS_TOKEN || !supabaseAdmin) {
     return NextResponse.json({ error: "No configurado" }, { status: 500 });
   }
 
@@ -26,7 +25,17 @@ export async function POST(req: NextRequest) {
 
   let pago;
   try {
-    pago = await new Payment(mpClient).get({ id: paymentId });
+    const resultado = await mpFetch<{ status?: string; external_reference?: string }>(
+      `/v1/payments/${paymentId}`
+    );
+    if (!resultado.ok || !resultado.data) {
+      console.error(
+        `Mercado Pago devolvió un error consultando el pago ${paymentId} (status ${resultado.status}):`,
+        resultado.raw
+      );
+      return NextResponse.json({ error: "No se pudo verificar el pago" }, { status: 502 });
+    }
+    pago = resultado.data;
   } catch (err) {
     console.error("No se pudo obtener el pago desde Mercado Pago:", err);
     return NextResponse.json({ error: "No se pudo verificar el pago" }, { status: 502 });
