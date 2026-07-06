@@ -112,7 +112,8 @@ function PagoPruebaPanel({ session }: { session: Session }) {
       });
       const data = await res.json();
       if (!res.ok || !data.initPoint) {
-        setError(data.error ?? "Error desconocido");
+        const debug = data._debugRuntime ? ` [runtime: ${data._debugRuntime}, status: ${data._debugStatus}]` : "";
+        setError((data.error ?? "Error desconocido") + debug);
         setStatus("error");
         return;
       }

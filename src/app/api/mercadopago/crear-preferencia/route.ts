@@ -137,7 +137,12 @@ export async function POST(req: NextRequest) {
       `Mercado Pago devolvió un error creando la preferencia (status ${resultado.status}):`,
       resultado.raw
     );
-    return NextResponse.json({ error: "Mercado Pago rechazó la preferencia de pago" }, { status: 502 });
+    // @ts-expect-error diagnóstico temporal: confirmar en qué runtime corrió esto
+    const runtimeReal = typeof EdgeRuntime !== "undefined" ? "edge" : "node";
+    return NextResponse.json(
+      { error: "Mercado Pago rechazó la preferencia de pago", _debugRuntime: runtimeReal, _debugStatus: resultado.status },
+      { status: 502 }
+    );
   }
 
   return NextResponse.json({ initPoint: resultado.data.init_point });
