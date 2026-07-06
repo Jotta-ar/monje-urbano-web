@@ -20,6 +20,10 @@ export async function mpFetch<T>(
     headers: {
       Authorization: `Bearer ${MP_ACCESS_TOKEN}`,
       "Content-Type": "application/json",
+      // fetch en Node no manda User-Agent por defecto; sin uno, el firewall
+      // de Mercado Pago rechaza la request con un 403 vacío (sin body).
+      "User-Agent": "MonjeUrbanoLibre/1.0",
+      Accept: "application/json",
       ...init.headers,
     },
   });
