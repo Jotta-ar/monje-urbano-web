@@ -2,6 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { MP_ACCESS_TOKEN, mpFetch } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 
+// Esta ruta también le pregunta a la API de Mercado Pago por el pago real
+// (ver abajo), así que corre desde la misma región que crear-preferencia
+// para evitar el mismo bloqueo de IPs de datacenters en EE.UU.
+export const preferredRegion = "gru1";
+
 /**
  * Mercado Pago llama a esta URL cada vez que cambia el estado de un pago.
  * El body de la notificación en sí NO se usa para decidir nada (se puede

@@ -5,6 +5,11 @@ import { requireAdmin } from "@/lib/admin-auth";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
+// Mercado Pago bloquea (403 sin body) las llamadas que llegan desde IPs de
+// datacenters en EE.UU. — corremos esta función desde São Paulo, más cerca
+// de la infraestructura de Mercado Pago y fuera de ese bloqueo.
+export const preferredRegion = "gru1";
+
 /**
  * Crea una preferencia de pago de Mercado Pago y devuelve la URL de checkout.
  *
