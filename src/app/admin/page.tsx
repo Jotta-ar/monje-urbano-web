@@ -88,6 +88,18 @@ function AdminTabs({ session }: { session: Session }) {
   );
 }
 
+const SERVICIOS_ORDEN = [
+  "magia_unica",
+  "magia_serie3",
+  "magia_serie6",
+  "magia_serie9",
+  "manifiesto",
+  "cartografia_pdf",
+  "cartografia_combo",
+  "ritual_matutino",
+];
+const PRODUCTOS_ORDEN = ["talisman", "porta_sahumerio"];
+
 function PreciosPanel() {
   const [precios, setPrecios] = useState<PrecioRow[]>([]);
   const [savedId, setSavedId] = useState<string | null>(null);
@@ -98,7 +110,6 @@ function PreciosPanel() {
     supabase
       .from("precios")
       .select("id, label, monto_ars, monto_usd")
-      .order("id")
       .then(({ data }) => setPrecios(data ?? []));
   }, []);
 
@@ -118,6 +129,43 @@ function PreciosPanel() {
     setTimeout(() => setSavedId(null), 1500);
   }
 
+  function actualizar(id: string, campo: "monto_ars" | "monto_usd", valor: string) {
+    setPrecios((prev) =>
+      prev.map((r) => (r.id === id ? { ...r, [campo]: valor ? Number(valor) : null } : r))
+    );
+  }
+
+  function fila(id: string) {
+    const row = precios.find((p) => p.id === id);
+    if (!row) return null;
+    return (
+      <div className="form-section" key={row.id}>
+        <h2 style={{ fontSize: "1.1rem" }}>{row.label}</h2>
+        <div className="form-row">
+          <div className="form-group">
+            <label>Monto ARS</label>
+            <input
+              type="number"
+              value={row.monto_ars ?? ""}
+              onChange={(e) => actualizar(row.id, "monto_ars", e.target.value)}
+            />
+          </div>
+          <div className="form-group">
+            <label>Monto USD</label>
+            <input
+              type="number"
+              value={row.monto_usd ?? ""}
+              onChange={(e) => actualizar(row.id, "monto_usd", e.target.value)}
+            />
+          </div>
+        </div>
+        <button type="button" className="btn-secondary" onClick={() => handleSave(row)}>
+          {savedId === row.id ? "Guardado ✓" : "Guardar"}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div>
       <div className="form-header">
@@ -127,40 +175,15 @@ function PreciosPanel() {
 
       {saveError && <p style={{ color: "#ff6666", fontSize: "0.85rem", marginBottom: 16 }}>{saveError}</p>}
 
-      {precios.map((row, i) => (
-        <div className="form-section" key={row.id}>
-          <h2 style={{ fontSize: "1.1rem" }}>{row.label}</h2>
-          <div className="form-row">
-            <div className="form-group">
-              <label>Monto ARS</label>
-              <input
-                type="number"
-                value={row.monto_ars ?? ""}
-                onChange={(e) => {
-                  const next = [...precios];
-                  next[i] = { ...row, monto_ars: e.target.value ? Number(e.target.value) : null };
-                  setPrecios(next);
-                }}
-              />
-            </div>
-            <div className="form-group">
-              <label>Monto USD</label>
-              <input
-                type="number"
-                value={row.monto_usd ?? ""}
-                onChange={(e) => {
-                  const next = [...precios];
-                  next[i] = { ...row, monto_usd: e.target.value ? Number(e.target.value) : null };
-                  setPrecios(next);
-                }}
-              />
-            </div>
-          </div>
-          <button type="button" className="btn-secondary" onClick={() => handleSave(precios[i])}>
-            {savedId === row.id ? "Guardado ✓" : "Guardar"}
-          </button>
-        </div>
-      ))}
+      {precios.length > 0 && (
+        <>
+          <h2 style={{ fontSize: "1.3rem", marginTop: 8, marginBottom: 4, color: "#eee" }}>Servicios</h2>
+          {SERVICIOS_ORDEN.map(fila)}
+
+          <h2 style={{ fontSize: "1.3rem", marginTop: 32, marginBottom: 4, color: "#eee" }}>Productos</h2>
+          {PRODUCTOS_ORDEN.map(fila)}
+        </>
+      )}
     </div>
   );
 }
