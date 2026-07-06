@@ -97,7 +97,7 @@ export async function POST(req: NextRequest) {
 
   let resultado;
   try {
-    resultado = await mpFetch<{ init_point?: string }>("/checkout/preferences", {
+    resultado = await mpFetch<{ init_point?: string; sandbox_init_point?: string }>("/checkout/preferences", {
       method: "POST",
       body: JSON.stringify({
         items: [
@@ -132,5 +132,11 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Mercado Pago rechazó la preferencia de pago" }, { status: 502 });
   }
 
-  return NextResponse.json({ initPoint: resultado.data.init_point });
+  // Con credenciales de TEST, Mercado Pago también devuelve un
+  // sandbox_init_point — hay que usar ESE, no init_point (que es el
+  // checkout real y rechaza las tarjetas de prueba). Con credenciales de
+  // producción, sandbox_init_point no viene, así que cae solo a init_point.
+  const initPoint = resultado.data.sandbox_init_point ?? resultado.data.init_point;
+
+  return NextResponse.json({ initPoint });
 }
