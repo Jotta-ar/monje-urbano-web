@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { requireAdmin } from "@/lib/admin-auth";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { enviarEmail } from "@/lib/resend";
+import { emailLinkRegalo } from "@/lib/emailTemplates";
 
 const SERVICIOS_VALIDOS = ["manifiesto", "cartografia", "magia_sanadora", "ritual_matutino"];
 
@@ -53,11 +55,32 @@ export async function POST(req: NextRequest) {
       monto: 0,
       pagado_en: new Date().toISOString(),
     })
-    .select("token")
+    .select("token, numero")
     .single();
 
   if (error || !data) {
     return NextResponse.json({ error: error?.message ?? "Error desconocido" }, { status: 500 });
   }
+
+  // Se manda solo — antes había que copiar el link y compartirlo a mano
+  // (por WhatsApp o donde sea). El link sigue devolviéndose igual por si
+  // hace falta reenviarlo o compartirlo por otro medio.
+  await enviarEmail({
+    to: destinatarioEmail,
+    ...emailLinkRegalo({
+      numero: data.numero,
+      servicio,
+      monto: 0,
+      moneda: "ARS",
+      es_regalo: true,
+      token: data.token,
+      comprador_nombre: null,
+      comprador_apellido: null,
+      comprador_email: null,
+      destinatario_nombre: destinatarioNombre || null,
+      destinatario_email: destinatarioEmail,
+    }),
+  });
+
   return NextResponse.json({ token: data.token });
 }

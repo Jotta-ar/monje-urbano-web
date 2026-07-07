@@ -55,6 +55,27 @@ export function emailAvisoAdmin(compra: CompraParaEmail): { subject: string; htm
   };
 }
 
+/** Le llega a quien compró (regalo o no), agradeciendo y confirmando los próximos pasos. */
+export function emailGraciasComprador(compra: CompraParaEmail): { subject: string; html: string } {
+  const titulo = SERVICIO_TITULOS[compra.servicio] ?? compra.servicio;
+
+  return {
+    subject: `¡Gracias por tu ${compra.es_regalo ? "regalo" : "compra"}!`,
+    html: ENVOLTORIO(`
+      <h2 style="margin:0 0 20px;">¡Gracias por tu confianza!</h2>
+      ${
+        compra.es_regalo
+          ? `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya le avisamos a
+             ${compra.destinatario_nombre ?? "quien lo recibe"} por mail para que complete su
+             formulario sin tener que pagar nada.</p>`
+          : `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya está todo listo de tu lado —
+             me pongo en marcha y te contacto para los próximos pasos.</p>`
+      }
+      <p style="margin-top:24px;font-family:Georgia,serif;color:#555;">Silencio, presencia y propósito.</p>
+    `),
+  };
+}
+
 /** Le llega a quien recibe un regalo, con el link para completar su formulario. */
 export function emailLinkRegalo(compra: CompraParaEmail): { subject: string; html: string } {
   const titulo = SERVICIO_TITULOS[compra.servicio] ?? compra.servicio;

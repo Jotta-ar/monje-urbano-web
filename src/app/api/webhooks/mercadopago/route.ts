@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { MP_CONFIGURED, mpFetch } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
 import { enviarEmail } from "@/lib/resend";
-import { emailAvisoAdmin, emailLinkRegalo } from "@/lib/emailTemplates";
+import { emailAvisoAdmin, emailGraciasComprador, emailLinkRegalo } from "@/lib/emailTemplates";
 
 const ADMIN_EMAIL = process.env.NOTIFY_EMAIL || "pedidos@monjeurbanolibre.com";
 
@@ -91,6 +91,9 @@ export async function POST(req: NextRequest) {
 
   if (actualizada) {
     await enviarEmail({ to: ADMIN_EMAIL, ...emailAvisoAdmin(actualizada) });
+    if (actualizada.comprador_email) {
+      await enviarEmail({ to: actualizada.comprador_email, ...emailGraciasComprador(actualizada) });
+    }
     if (actualizada.es_regalo && actualizada.destinatario_email) {
       await enviarEmail({ to: actualizada.destinatario_email, ...emailLinkRegalo(actualizada) });
     }
