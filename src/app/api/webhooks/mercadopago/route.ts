@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
 import { MP_CONFIGURED, mpFetch } from "@/lib/mercadopago";
 import { supabaseAdmin } from "@/lib/supabase-admin";
+import { enviarEmail } from "@/lib/resend";
+import { emailAvisoAdmin, emailLinkRegalo } from "@/lib/emailTemplates";
+
+const ADMIN_EMAIL = process.env.NOTIFY_EMAIL || "pedidos@monjeurbanolibre.com";
 
 /**
  * Mercado Pago llama a esta URL cada vez que cambia el estado de un pago.
@@ -68,9 +72,10 @@ export async function POST(req: NextRequest) {
   const ahora = new Date().toISOString();
 
   // El filtro .eq("estado", "pendiente_pago") hace esto idempotente: si
-  // Mercado Pago reenvía la misma notificación, el segundo update no
-  // encuentra filas para tocar y no pasa nada.
-  await supabaseAdmin
+  // Mercado Pago reenvía la misma notificación (pasa seguido, manda varias
+  // por el mismo pago), el segundo update no encuentra filas para tocar y
+  // .select() devuelve vacío — así los mails de abajo solo salen una vez.
+  const { data: actualizada } = await supabaseAdmin
     .from("compras")
     .update(
       compra.es_regalo
@@ -78,7 +83,18 @@ export async function POST(req: NextRequest) {
         : { estado: "completado", pagado_en: ahora, completado_en: ahora }
     )
     .eq("id", externalReference)
-    .eq("estado", "pendiente_pago");
+    .eq("estado", "pendiente_pago")
+    .select(
+      "numero, servicio, monto, moneda, es_regalo, token, comprador_nombre, comprador_apellido, comprador_email, destinatario_nombre, destinatario_email"
+    )
+    .single();
+
+  if (actualizada) {
+    await enviarEmail({ to: ADMIN_EMAIL, ...emailAvisoAdmin(actualizada) });
+    if (actualizada.es_regalo && actualizada.destinatario_email) {
+      await enviarEmail({ to: actualizada.destinatario_email, ...emailLinkRegalo(actualizada) });
+    }
+  }
 
   return NextResponse.json({ ok: true });
 }
