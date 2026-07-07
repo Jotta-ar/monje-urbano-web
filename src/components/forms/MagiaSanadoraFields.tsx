@@ -46,19 +46,6 @@ export default function MagiaSanadoraFields() {
         <p className="hint">Solo si te sentís cómodo/a.</p>
       </div>
 
-      <h2 style={{ marginTop: 32 }}>Modalidad</h2>
-      <div className="form-group">
-        <label className="required">Serie elegida</label>
-        <select name="serie" required defaultValue="">
-          <option value="" disabled>Elegí una opción</option>
-          <option value="unica">Única (1 ritual)</option>
-          <option value="serie3">Serie 3</option>
-          <option value="serie6">Serie 6</option>
-          <option value="serie9">Serie 9</option>
-          <option value="intensivo">Quiero consultar tratamiento intensivo diario</option>
-        </select>
-      </div>
-
       <h2 style={{ marginTop: 32 }}>Alineación y consentimiento</h2>
 
       <div className="form-group">

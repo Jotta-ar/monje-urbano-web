@@ -10,6 +10,7 @@ import OrderSubmitSection from "@/components/gift/OrderSubmitSection";
 import PersonalDataFields from "@/components/forms/PersonalDataFields";
 import ComoSupisteField from "@/components/forms/ComoSupisteField";
 import MagiaSanadoraFields from "@/components/forms/MagiaSanadoraFields";
+import SerieSelector from "@/components/forms/SerieSelector";
 
 export default function PedirMagiaSanadoraPage() {
   const formRef = useRef<HTMLFormElement>(null);
@@ -25,6 +26,11 @@ export default function PedirMagiaSanadoraPage() {
       <GiftModeProvider>
         <form ref={formRef} onSubmit={(e) => e.preventDefault()}>
           <GiftToggle />
+
+          <div className="form-section">
+            <h2>Modalidad</h2>
+            <SerieSelector />
+          </div>
 
           <ContentFields>
             <h2>Datos personales</h2>
