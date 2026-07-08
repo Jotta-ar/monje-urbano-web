@@ -8,10 +8,9 @@ const STRIPE_CONFIGURED = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 /**
  * Currency/gateway picker: ARS -> Mercado Pago, USD -> Stripe.
- * Pre-selects a guess from the browser locale/timezone (client-side heuristic —
- * in production this should be a Vercel Edge geo header read server-side), but
- * always leaves the toggle visible/overridable since IP/locale detection can
- * be wrong (VPN, roaming, etc).
+ * Pre-selecciona según el país detectado por IP en middleware.ts (guardado
+ * en la cookie "moneda"), pero siempre deja el toggle visible y editable
+ * porque la detección por IP puede fallar (VPN, roaming, etc).
  */
 export default function PaymentGatewayButtons({
   onPagar,
@@ -21,10 +20,11 @@ export default function PaymentGatewayButtons({
   const [moneda, setMoneda] = useState<Moneda>("ARS");
 
   useEffect(() => {
-    const tz = Intl.DateTimeFormat().resolvedOptions().timeZone || "";
-    const lang = navigator.language || "";
-    const pareceArgentina = tz.includes("Argentina") || lang.toLowerCase().includes("ar");
-    setMoneda(pareceArgentina ? "ARS" : "USD");
+    const cookie = document.cookie
+      .split("; ")
+      .find((c) => c.startsWith("moneda="))
+      ?.split("=")[1];
+    setMoneda(cookie === "USD" ? "USD" : "ARS");
   }, []);
 
   return (
