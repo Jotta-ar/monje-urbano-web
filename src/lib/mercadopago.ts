@@ -82,6 +82,10 @@ export function precioIdPara(servicio: string, modalidad?: string | null): strin
         default:
           return null;
       }
+    case "talisman":
+      return "talisman";
+    case "porta_sahumerio":
+      return "porta_sahumerio";
     default:
       return null;
   }
@@ -92,4 +96,6 @@ export const SERVICIO_TITULOS: Record<string, string> = {
   ritual_matutino: "Ritual Matutino Personalizado",
   cartografia: "Cartografía del Síntoma",
   magia_sanadora: "Magia Sanadora",
+  talisman: "Talismán del Monje",
+  porta_sahumerio: "Porta Sahumerios Invertido",
 };

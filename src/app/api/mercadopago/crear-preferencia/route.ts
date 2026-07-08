@@ -28,6 +28,7 @@ export async function POST(req: NextRequest) {
   let title: string;
   let amount: number;
   let externalReference: string;
+  let servicioCompra: string | null = null;
 
   if (compraId) {
     const { data: compra, error } = await supabaseAdmin
@@ -73,6 +74,7 @@ export async function POST(req: NextRequest) {
     amount = Number(precio.monto_ars);
     title = precio.label;
     externalReference = compra.id;
+    servicioCompra = compra.servicio;
 
     // Guardamos ya el monto autoritativo y la pasarela, para que el panel de
     // admin muestre el precio real aunque el pago todavía no esté confirmado.
@@ -115,8 +117,8 @@ export async function POST(req: NextRequest) {
         external_reference: externalReference,
         notification_url: `${SITE_URL}/api/webhooks/mercadopago`,
         back_urls: {
-          success: `${SITE_URL}/pedir/gracias`,
-          pending: `${SITE_URL}/pedir/gracias`,
+          success: `${SITE_URL}/pedir/gracias${servicioCompra ? `?servicio=${servicioCompra}` : ""}`,
+          pending: `${SITE_URL}/pedir/gracias${servicioCompra ? `?servicio=${servicioCompra}` : ""}`,
           failure: `${SITE_URL}/pedir/error`,
         },
         ...(esLocal ? {} : { auto_return: "approved" as const }),

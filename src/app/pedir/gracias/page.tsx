@@ -1,6 +1,35 @@
 import Link from "next/link";
+import { PRODUCTO_MENSAJES } from "@/lib/productos";
 
-export default function PagoGraciasPage() {
+export default async function PagoGraciasPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ servicio?: string }>;
+}) {
+  const { servicio } = await searchParams;
+  const producto = servicio ? PRODUCTO_MENSAJES[servicio] : undefined;
+
+  if (producto) {
+    return (
+      <div className="form-plain">
+        <div className="form-header">
+          <h1>{producto.subtitulo}</h1>
+        </div>
+        {producto.cuerpo.split("\n\n").map((parrafo, i) => (
+          <p key={i} style={{ textAlign: "center", color: "#ccc", maxWidth: 480, margin: "0 auto 20px" }}>
+            {parrafo}
+          </p>
+        ))}
+        <p style={{ textAlign: "center", color: "#999", fontFamily: "'Pirata One', serif", marginTop: 8 }}>
+          Silencio, presencia y propósito.
+        </p>
+        <div style={{ textAlign: "center", marginTop: 28 }}>
+          <Link href="/" className="btn-secondary">Volver al inicio</Link>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="form-plain">
       <div className="form-header">

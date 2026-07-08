@@ -5,7 +5,6 @@ import TestimonialTeaser from "@/components/semillas/TestimonialTeaser";
 import NewsletterForm from "@/components/NewsletterForm";
 import ContactForm from "@/components/ContactForm";
 import RevealObserver from "@/components/RevealObserver";
-import ComingSoonButton from "@/components/ComingSoonButton";
 
 export default function Home() {
   return (
@@ -396,7 +395,7 @@ export default function Home() {
                 montada a mano con argollas metálicas y tira de gamuza con cierre gancho.
               </p>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 20 }}>
-                <ComingSoonButton className="btn-primary">Comprar Talismán</ComingSoonButton>
+                <Link href="/pedir/talisman" className="btn-primary">Comprar Talismán</Link>
                 <Link href="/consultas?servicio=Talismanes+del+Monje" className="btn-outline">Consultar</Link>
               </div>
             </div>
@@ -458,7 +457,7 @@ export default function Home() {
           <div className="reveal" style={{ textAlign: "center", marginTop: 40 }}>
             <PriceTag ids={["talisman"]} labels={["Talismán"]} />
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
-              <ComingSoonButton className="btn-primary">Comprar Talismán</ComingSoonButton>
+              <Link href="/pedir/talisman" className="btn-primary">Comprar Talismán</Link>
               <Link href="/consultas?servicio=Talismanes+del+Monje" className="btn-outline">Consultar</Link>
             </div>
           </div>
@@ -497,7 +496,7 @@ export default function Home() {
                 prácticas espirituales con sobriedad y poder.
               </p>
               <div style={{ display: "flex", gap: 14, flexWrap: "wrap", marginTop: 20 }}>
-                <ComingSoonButton className="btn-primary">Comprar</ComingSoonButton>
+                <Link href="/pedir/porta-sahumerio" className="btn-primary">Comprar</Link>
                 <Link href="/consultas?servicio=Porta+Sahumerios+Invertidos" className="btn-outline">Consultar</Link>
               </div>
             </div>
@@ -535,7 +534,7 @@ export default function Home() {
           <div className="reveal" style={{ textAlign: "center", marginTop: 40 }}>
             <PriceTag ids={["porta_sahumerio"]} labels={["Porta Sahumerio"]} />
             <div style={{ display: "flex", gap: 14, flexWrap: "wrap", justifyContent: "center" }}>
-              <ComingSoonButton className="btn-primary">Comprar</ComingSoonButton>
+              <Link href="/pedir/porta-sahumerio" className="btn-primary">Comprar</Link>
               <Link href="/consultas?servicio=Porta+Sahumerios+Invertidos" className="btn-outline">Consultar</Link>
             </div>
           </div>

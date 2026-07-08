@@ -1,5 +1,6 @@
 import "server-only";
 import { SERVICIO_TITULOS } from "@/lib/mercadopago";
+import { PRODUCTO_MENSAJES } from "@/lib/productos";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL || "http://localhost:3000";
 
@@ -93,6 +94,21 @@ export function emailAvisoAdmin(compra: CompraParaEmail): { subject: string; htm
 
 /** Le llega a quien compró (regalo o no), agradeciendo y confirmando los próximos pasos. */
 export function emailGraciasComprador(compra: CompraParaEmail): { subject: string; html: string } {
+  const producto = PRODUCTO_MENSAJES[compra.servicio];
+  if (producto) {
+    const parrafos = producto.cuerpo
+      .split("\n\n")
+      .map((p) => `<p>${p}</p>`)
+      .join("\n");
+    return {
+      subject: producto.subtitulo,
+      html: ENVOLTORIO(`
+        <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">${producto.subtitulo}</h2>
+        ${parrafos}
+      `),
+    };
+  }
+
   const titulo = SERVICIO_TITULOS[compra.servicio] ?? compra.servicio;
 
   return {
