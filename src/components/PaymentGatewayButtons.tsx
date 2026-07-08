@@ -8,16 +8,16 @@ const STRIPE_CONFIGURED = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
 
 /**
  * Currency/gateway picker: ARS -> Mercado Pago, USD -> Stripe.
- * Pre-selecciona según el país detectado por IP en middleware.ts (guardado
- * en la cookie "moneda"), pero siempre deja el toggle visible y editable
- * porque la detección por IP puede fallar (VPN, roaming, etc).
+ * La moneda la decide sola la página según el país detectado por IP en
+ * middleware.ts (guardado en la cookie "moneda") — no se muestra ningún
+ * selector, cada visitante ve directo el botón que le corresponde.
  */
 export default function PaymentGatewayButtons({
   onPagar,
 }: {
   onPagar: (moneda: Moneda) => void;
 }) {
-  const [moneda, setMoneda] = useState<Moneda>("ARS");
+  const [moneda, setMoneda] = useState<Moneda | null>(null);
 
   useEffect(() => {
     const cookie = document.cookie
@@ -27,27 +27,12 @@ export default function PaymentGatewayButtons({
     setMoneda(cookie === "USD" ? "USD" : "ARS");
   }, []);
 
+  // Evita el parpadeo de mostrar el botón equivocado un instante antes de
+  // leer la cookie en el efecto de arriba.
+  if (!moneda) return null;
+
   return (
     <div>
-      <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 14 }}>
-        <button
-          type="button"
-          className={moneda === "ARS" ? "btn-outline" : "btn-secondary"}
-          style={moneda === "ARS" ? { background: "rgba(255,255,255,0.12)" } : undefined}
-          onClick={() => setMoneda("ARS")}
-        >
-          Pesos (Argentina)
-        </button>
-        <button
-          type="button"
-          className={moneda === "USD" ? "btn-outline" : "btn-secondary"}
-          style={moneda === "USD" ? { background: "rgba(255,255,255,0.12)" } : undefined}
-          onClick={() => setMoneda("USD")}
-        >
-          Dólares (Exterior)
-        </button>
-      </div>
-
       <button type="button" className="btn-primary" onClick={() => onPagar(moneda)}>
         {moneda === "ARS" ? "Pagar con Mercado Pago" : "Pagar con Stripe (USD)"}
       </button>

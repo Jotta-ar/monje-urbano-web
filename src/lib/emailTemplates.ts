@@ -17,15 +17,43 @@ type CompraParaEmail = {
   destinatario_email: string | null;
 };
 
-const ENVOLTORIO = (contenido: string) => `
-  <div style="background:#111;padding:40px 20px;font-family:Georgia,'Times New Roman',serif;">
-    <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:4px;padding:36px 32px;color:#222;">
-      ${contenido}
-      <p style="margin-top:32px;font-size:12px;color:#999;text-align:center;">
-        Monje Urbano Libre — Silencio, presencia y propósito.
-      </p>
+// Pompiere es una letra cursiva bastante fina — hay que usarla más grande de
+// lo normal para que se lea bien en pantallas chicas de celular. Pirata One
+// es gótica/blackletter, también necesita buen tamaño.
+// Ojo: muchos clientes de mail (sobre todo las apps de Gmail/Outlook en el
+// celular) ignoran @font-face y directamente muestran la tipografía de
+// respaldo (Georgia) — por eso el <style> Y el fallback inline importan acá.
+const ENVOLTORIO = (contenido: string) => `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <style>
+      @font-face {
+        font-family: 'Pirata One';
+        src: url('${SITE_URL}/fonts/PirataOne-Regular.ttf') format('truetype');
+      }
+      @font-face {
+        font-family: 'Pompiere';
+        src: url('${SITE_URL}/fonts/Pompiere-Regular.ttf') format('truetype');
+      }
+      h2 { font-family: 'Pirata One', Georgia, serif; font-size: 32px; font-weight: normal; }
+      p { font-family: 'Pompiere', Georgia, serif; font-size: 20px; line-height: 1.6; }
+    </style>
+  </head>
+  <body style="margin:0;">
+    <div style="background:#111;padding:40px 20px;font-family:'Pompiere',Georgia,serif;font-size:20px;line-height:1.6;">
+      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:4px;padding:36px 32px;color:#222;">
+        <div style="text-align:center;margin-bottom:24px;">
+          <img src="${SITE_URL}/logos/logo-completo-negro.png" alt="Monje Urbano Libre" width="280" style="max-width:280px;height:auto;" />
+        </div>
+        ${contenido}
+        <p style="margin-top:32px;font-family:'Pirata One',Georgia,serif;font-size:16px;color:#999;text-align:center;">
+          Monje Urbano Libre — Silencio, presencia y propósito.
+        </p>
+      </div>
     </div>
-  </div>
+  </body>
+</html>
 `;
 
 /** Aviso interno: le llega al admin cuando se confirma el pago de un pedido. */
@@ -37,7 +65,7 @@ export function emailAvisoAdmin(compra: CompraParaEmail): { subject: string; htm
   return {
     subject: `Pedido #${compra.numero} pagado — ${titulo}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;">Nuevo pedido pagado</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Nuevo pedido pagado</h2>
       <p><strong>Pedido:</strong> #${compra.numero}</p>
       <p><strong>Servicio:</strong> ${titulo}${compra.es_regalo ? " (regalo)" : ""}</p>
       <p><strong>Monto:</strong> ${monto}</p>
@@ -62,7 +90,7 @@ export function emailGraciasComprador(compra: CompraParaEmail): { subject: strin
   return {
     subject: `¡Gracias por tu ${compra.es_regalo ? "regalo" : "compra"}!`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;">¡Gracias por tu confianza!</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">¡Gracias por tu confianza!</h2>
       ${
         compra.es_regalo
           ? `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya le avisamos a
@@ -71,7 +99,7 @@ export function emailGraciasComprador(compra: CompraParaEmail): { subject: strin
           : `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya está todo listo de tu lado —
              me pongo en marcha y te contacto para los próximos pasos.</p>`
       }
-      <p style="margin-top:24px;font-family:Georgia,serif;color:#555;">Silencio, presencia y propósito.</p>
+      <p style="margin-top:24px;font-family:'Pirata One',Georgia,serif;font-size:20px;color:#555;">Silencio, presencia y propósito.</p>
     `),
   };
 }
@@ -102,7 +130,7 @@ export function emailAvisoConsulta(consulta: ConsultaParaEmail): { subject: stri
   return {
     subject: `Nueva consulta${consulta.servicio ? ` — ${consulta.servicio}` : ""} de ${nombreCompleto}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;">Nueva consulta</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Nueva consulta</h2>
       <p><strong>De:</strong> ${nombreCompleto} — ${consulta.email}</p>
       <p><strong>WhatsApp:</strong> ${consulta.whatsapp}</p>
       ${consulta.servicio ? `<p><strong>Servicio:</strong> ${consulta.servicio}</p>` : ""}
@@ -126,9 +154,9 @@ export function emailRespuestaConsulta(mensajeOriginal: string, respuesta: strin
   return {
     subject: "Respuesta a tu consulta — Monje Urbano Libre",
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;">Tu consulta</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Tu consulta</h2>
       <p style="color:#888;white-space:pre-wrap;border-left:2px solid #ddd;padding-left:14px;">${mensajeOriginal}</p>
-      <h2 style="margin:24px 0 12px;">Respuesta</h2>
+      <h2 style="margin:24px 0 12px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Respuesta</h2>
       <p style="white-space:pre-wrap;">${respuesta}</p>
     `),
   };
@@ -143,7 +171,7 @@ export function emailLinkRegalo(compra: CompraParaEmail): { subject: string; htm
   return {
     subject: `Te regalaron ${titulo}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;">Te regalaron ${titulo}</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Te regalaron ${titulo}</h2>
       <p>
         ${regalador ? `${regalador} pensó en vos.` : "Alguien pensó en vos."}
         Ya está todo pago — solo falta que completes tu historia para que empecemos.
