@@ -14,16 +14,24 @@ export default function ConsultasForm() {
     e.preventDefault();
     const fd = new FormData(e.currentTarget);
 
+    const nombre = fd.get("nombre") as string;
+    const apellido = fd.get("apellido") as string;
+    const email = fd.get("email") as string;
+    const whatsapp = fd.get("whatsapp") as string;
+    const mensaje = fd.get("mensaje") as string;
+    const pais = (fd.get("pais") as string) || null;
+    const ciudad = (fd.get("ciudad") as string) || null;
+
     if (supabase) {
       const { error } = await supabase.from("consultas").insert({
         servicio,
-        nombre: fd.get("nombre"),
-        apellido: fd.get("apellido"),
-        email: fd.get("email"),
-        whatsapp: fd.get("whatsapp"),
-        mensaje: fd.get("mensaje"),
-        pais: fd.get("pais") || null,
-        ciudad: fd.get("ciudad") || null,
+        nombre,
+        apellido,
+        email,
+        whatsapp,
+        mensaje,
+        pais,
+        ciudad,
       });
       if (error) {
         console.error("consultas insert failed:", error);
@@ -31,6 +39,15 @@ export default function ConsultasForm() {
         return;
       }
     }
+
+    // El aviso por mail no debe bloquear la confirmación al usuario si falla
+    // (la consulta ya quedó guardada, que es lo importante).
+    fetch("/api/consultas/notificar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ servicio, nombre, apellido, email, whatsapp, mensaje, pais, ciudad }),
+    }).catch((err) => console.error("aviso de consulta falló:", err));
+
     setStatus("sent");
   }
 
@@ -112,12 +129,6 @@ export default function ConsultasForm() {
             <label>Ciudad (opcional)</label>
             <input type="text" name="ciudad" placeholder="Ciudad" />
           </div>
-        </div>
-
-        <div className="form-group">
-          <label>Adjuntar archivo (opcional)</label>
-          <input type="file" name="archivo" accept="image/*,application/pdf" />
-          <p className="hint">Imagen o PDF de hasta 10 MB</p>
         </div>
 
         <div className="checkbox-group">

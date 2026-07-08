@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import { supabase } from "@/lib/supabase";
 import { formDataToObject } from "@/lib/formData";
+import { subirArchivo } from "@/lib/storage";
 
 const SERVICIOS = [
   "Magia Sanadora",
@@ -35,6 +36,8 @@ export default function CompartirExperienciaPage() {
       return;
     }
     const datos = formDataToObject(fd);
+    const foto = fd.get("foto");
+    const fotoUrl = foto instanceof File ? await subirArchivo(foto, "testimonios") : null;
 
     if (supabase) {
       const { error } = await supabase.from("testimonios").insert({
@@ -50,6 +53,7 @@ export default function CompartirExperienciaPage() {
         frase: datos.frase,
         valoracion: Number(datos.valoracion),
         privacidad: datos.privacidad,
+        foto_url: fotoUrl,
         mejora_interna: datos.mejora || null,
         autorizado: datos.privacidad !== "privado",
         publicado: false,

@@ -50,7 +50,7 @@ export default function AdminPage() {
 }
 
 function AdminTabs({ session }: { session: Session }) {
-  const [tab, setTab] = useState<"precios" | "pedidos" | "regalar" | "pago-prueba">("pedidos");
+  const [tab, setTab] = useState<"precios" | "pedidos" | "regalar" | "pago-prueba" | "consultas">("pedidos");
 
   return (
     <div className="form-plain" style={{ maxWidth: 1000 }}>
@@ -87,12 +87,21 @@ function AdminTabs({ session }: { session: Session }) {
         >
           Pago de prueba
         </button>
+        <button
+          type="button"
+          className={tab === "consultas" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("consultas")}
+        >
+          Consultas
+        </button>
       </div>
 
       {tab === "pedidos" && <PedidosPanel session={session} />}
       {tab === "regalar" && <RegalarPanel session={session} />}
       {tab === "precios" && <PreciosPanel />}
       {tab === "pago-prueba" && <PagoPruebaPanel session={session} />}
+      {tab === "consultas" && <ConsultasPanel session={session} />}
     </div>
   );
 }
@@ -137,6 +146,174 @@ function PagoPruebaPanel({ session }: { session: Session }) {
         {status === "creando" ? "Generando…" : "Pagar $30.000 de prueba"}
       </button>
       {error && <p style={{ color: "#e88", marginTop: 12 }}>{error}</p>}
+    </div>
+  );
+}
+
+interface Consulta {
+  id: string;
+  servicio: string | null;
+  nombre: string;
+  apellido: string;
+  email: string;
+  whatsapp: string;
+  mensaje: string;
+  pais: string | null;
+  ciudad: string | null;
+  respuesta: string | null;
+  respondido_en: string | null;
+  creado_en: string;
+}
+
+function ConsultasPanel({ session }: { session: Session }) {
+  const [consultas, setConsultas] = useState<Consulta[] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [subTab, setSubTab] = useState<"pendientes" | "respondidas">("pendientes");
+  const token = session.access_token;
+
+  async function cargar() {
+    setError(null);
+    const res = await fetch("/api/admin/consultas", { headers: { Authorization: `Bearer ${token}` } });
+    if (!res.ok) {
+      setError("No se pudieron cargar las consultas.");
+      return;
+    }
+    const { consultas } = await res.json();
+    setConsultas(consultas);
+  }
+
+  useEffect(() => {
+    cargar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const pendientes = consultas?.filter((c) => !c.respondido_en) ?? [];
+  const respondidas = consultas?.filter((c) => c.respondido_en) ?? [];
+  const visibles = subTab === "pendientes" ? pendientes : respondidas;
+
+  return (
+    <div>
+      <div className="form-header">
+        <h1>Consultas</h1>
+        <p>Respondé desde acá — el mail sale automáticamente a quien consultó.</p>
+      </div>
+
+      {error && <p style={{ color: "#ff6666", fontSize: "0.85rem", marginBottom: 16 }}>{error}</p>}
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
+        <button
+          type="button"
+          className={subTab === "pendientes" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "6px 18px", fontSize: "0.85rem" }}
+          onClick={() => setSubTab("pendientes")}
+        >
+          Pendientes ({pendientes.length})
+        </button>
+        <button
+          type="button"
+          className={subTab === "respondidas" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "6px 18px", fontSize: "0.85rem" }}
+          onClick={() => setSubTab("respondidas")}
+        >
+          Respondidas ({respondidas.length})
+        </button>
+      </div>
+
+      {consultas === null && <p style={{ color: "#888" }}>Cargando…</p>}
+      {consultas !== null && visibles.length === 0 && (
+        <p style={{ color: "#888" }}>
+          {subTab === "pendientes" ? "No hay consultas pendientes. ✨" : "Todavía no respondiste ninguna consulta."}
+        </p>
+      )}
+
+      {visibles.map((c) => (
+        <ConsultaRow key={c.id} consulta={c} token={token} onRespondida={cargar} />
+      ))}
+    </div>
+  );
+}
+
+function ConsultaRow({
+  consulta: c,
+  token,
+  onRespondida,
+}: {
+  consulta: Consulta;
+  token: string;
+  onRespondida: () => void;
+}) {
+  const [respuesta, setRespuesta] = useState("");
+  const [enviando, setEnviando] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  // La dirección del "to" no se codifica (la @ codificada como %40 rompe
+  // el link en varios clientes de correo) — solo el subject.
+  const mailtoReply = `mailto:${c.email}?subject=${encodeURIComponent(
+    "Re: tu consulta a Monje Urbano Libre"
+  )}`;
+
+  async function enviarRespuesta() {
+    if (!respuesta.trim()) return;
+    setEnviando(true);
+    setError(null);
+    const res = await fetch(`/api/admin/consultas/${c.id}/responder`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ respuesta }),
+    });
+    setEnviando(false);
+    if (!res.ok) {
+      setError("No se pudo enviar la respuesta, probá de nuevo.");
+      return;
+    }
+    onRespondida();
+  }
+
+  return (
+    <div className="form-section">
+      <h2 style={{ fontSize: "1.05rem", marginBottom: 4 }}>
+        {c.nombre} {c.apellido}
+        {c.servicio ? ` — ${c.servicio}` : ""}
+      </h2>
+      <p style={{ color: "#999", fontSize: "0.85rem", margin: 0 }}>
+        {c.email} · {c.whatsapp}
+        {(c.pais || c.ciudad) && ` · ${[c.ciudad, c.pais].filter(Boolean).join(", ")}`}
+      </p>
+      <p style={{ color: "#777", fontSize: "0.8rem", margin: "4px 0 12px" }}>
+        {new Date(c.creado_en).toLocaleString("es-AR")}
+      </p>
+      <p style={{ whiteSpace: "pre-wrap", color: "#ddd", marginBottom: 12 }}>{c.mensaje}</p>
+
+      {c.respondido_en ? (
+        <div style={{ background: "rgba(255,255,255,0.05)", borderRadius: 4, padding: 14 }}>
+          <p style={{ fontSize: "0.75rem", color: "#888", margin: "0 0 6px" }}>
+            Respondida el {new Date(c.respondido_en).toLocaleString("es-AR")}
+          </p>
+          <p style={{ whiteSpace: "pre-wrap", margin: 0 }}>{c.respuesta}</p>
+        </div>
+      ) : (
+        <>
+          <textarea
+            value={respuesta}
+            onChange={(e) => setRespuesta(e.target.value)}
+            placeholder="Escribí tu respuesta…"
+            style={{ width: "100%", minHeight: 90, marginBottom: 10 }}
+          />
+          <div style={{ display: "flex", gap: 10, alignItems: "center", flexWrap: "wrap" }}>
+            <button
+              type="button"
+              className="btn-primary"
+              onClick={enviarRespuesta}
+              disabled={enviando || !respuesta.trim()}
+            >
+              {enviando ? "Enviando…" : "Enviar respuesta"}
+            </button>
+            <a href={mailtoReply} className="btn-secondary" style={{ fontSize: "0.85rem" }}>
+              Responder por mail
+            </a>
+          </div>
+          {error && <p style={{ color: "#e88", marginTop: 8 }}>{error}</p>}
+        </>
+      )}
     </div>
   );
 }

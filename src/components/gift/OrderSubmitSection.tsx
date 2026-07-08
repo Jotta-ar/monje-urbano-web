@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useGiftMode } from "./GiftModeContext";
 import PaymentGatewayButtons from "@/components/PaymentGatewayButtons";
 import { crearCompra, type Moneda } from "@/lib/compras";
-import { formDataToObject } from "@/lib/formData";
+import { formDataToObjectConArchivos } from "@/lib/formData";
 
 export default function OrderSubmitSection({
   servicio,
@@ -27,7 +27,7 @@ export default function OrderSubmitSection({
 
     setStatus("enviando");
     const fd = new FormData(form);
-    const datos = formDataToObject(fd);
+    const datos = await formDataToObjectConArchivos(fd, `compras/${servicio}`);
 
     try {
       const { id, error } = await crearCompra({
