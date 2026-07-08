@@ -34,7 +34,7 @@ export default function PaymentGatewayButtons({
   return (
     <div>
       <button type="button" className="btn-primary" onClick={() => onPagar(moneda)}>
-        {moneda === "ARS" ? "Pagar con Mercado Pago" : "Pagar con Stripe (USD)"}
+        Pagar
       </button>
 
       {((moneda === "ARS" && !MP_CONFIGURED) || (moneda === "USD" && !STRIPE_CONFIGURED)) && (

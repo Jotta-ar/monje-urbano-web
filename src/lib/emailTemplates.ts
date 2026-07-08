@@ -17,6 +17,12 @@ type CompraParaEmail = {
   destinatario_email: string | null;
 };
 
+// Diseño de mails: el sitio entero es de tema oscuro, así que la tarjeta del
+// mail también lo es a propósito (no una tarjeta blanca) — así el logo va
+// siempre en su versión blanca con fondo transparente (logo-completo-blanco),
+// nunca la negra, porque no tendría contraste. Esta es la regla para
+// CUALQUIER mail transaccional del proyecto, no solo estas plantillas.
+//
 // Pompiere es una letra cursiva bastante fina — hay que usarla más grande de
 // lo normal para que se lea bien en pantallas chicas de celular. Pirata One
 // es gótica/blackletter, también necesita buen tamaño.
@@ -27,6 +33,8 @@ const ENVOLTORIO = (contenido: string) => `<!DOCTYPE html>
 <html>
   <head>
     <meta charset="utf-8" />
+    <meta name="color-scheme" content="dark light" />
+    <meta name="supported-color-schemes" content="dark light" />
     <style>
       @font-face {
         font-family: 'Pirata One';
@@ -36,18 +44,18 @@ const ENVOLTORIO = (contenido: string) => `<!DOCTYPE html>
         font-family: 'Pompiere';
         src: url('${SITE_URL}/fonts/Pompiere-Regular.ttf') format('truetype');
       }
-      h2 { font-family: 'Pirata One', Georgia, serif; font-size: 32px; font-weight: normal; }
-      p { font-family: 'Pompiere', Georgia, serif; font-size: 20px; line-height: 1.6; }
+      h2 { font-family: 'Pirata One', Georgia, serif; font-size: 32px; font-weight: normal; color: #fff; }
+      p { font-family: 'Pompiere', Georgia, serif; font-size: 20px; line-height: 1.6; color: #eee; }
     </style>
   </head>
-  <body style="margin:0;">
-    <div style="background:#111;padding:40px 20px;font-family:'Pompiere',Georgia,serif;font-size:20px;line-height:1.6;">
-      <div style="max-width:520px;margin:0 auto;background:#fff;border-radius:4px;padding:36px 32px;color:#222;">
+  <body style="margin:0;background:#000;">
+    <div style="background:#000;padding:40px 20px;font-family:'Pompiere',Georgia,serif;font-size:20px;line-height:1.6;color:#eee;">
+      <div style="max-width:520px;margin:0 auto;background:#161616;border-radius:4px;padding:36px 32px;color:#eee;">
         <div style="text-align:center;margin-bottom:24px;">
-          <img src="${SITE_URL}/logos/logo-completo-negro.png" alt="Monje Urbano Libre" width="280" style="max-width:280px;height:auto;" />
+          <img src="${SITE_URL}/logos/logo-completo-blanco.png" alt="Monje Urbano Libre" width="280" style="max-width:280px;height:auto;" />
         </div>
         ${contenido}
-        <p style="margin-top:32px;font-family:'Pirata One',Georgia,serif;font-size:16px;color:#999;text-align:center;">
+        <p style="margin-top:32px;font-family:'Pirata One',Georgia,serif;font-size:16px;color:#888;text-align:center;">
           Monje Urbano Libre — Silencio, presencia y propósito.
         </p>
       </div>
@@ -77,7 +85,7 @@ export function emailAvisoAdmin(compra: CompraParaEmail): { subject: string; htm
           : `<p>El formulario ya está completo, listo para trabajar.</p>`
       }
       <p style="margin-top:24px;">
-        <a href="${SITE_URL}/admin" style="color:#111;">Ver en el panel de administración →</a>
+        <a href="${SITE_URL}/admin" style="color:#ccc;">Ver en el panel de administración →</a>
       </p>
     `),
   };
@@ -99,7 +107,7 @@ export function emailGraciasComprador(compra: CompraParaEmail): { subject: strin
           : `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya está todo listo de tu lado —
              me pongo en marcha y te contacto para los próximos pasos.</p>`
       }
-      <p style="margin-top:24px;font-family:'Pirata One',Georgia,serif;font-size:20px;color:#555;">Silencio, presencia y propósito.</p>
+      <p style="margin-top:24px;font-family:'Pirata One',Georgia,serif;font-size:20px;color:#aaa;">Silencio, presencia y propósito.</p>
     `),
   };
 }
@@ -138,12 +146,12 @@ export function emailAvisoConsulta(consulta: ConsultaParaEmail): { subject: stri
       <p style="margin-top:16px;"><strong>Consulta:</strong></p>
       <p style="white-space:pre-wrap;">${consulta.mensaje}</p>
       <p style="text-align:center;margin:32px 0;">
-        <a href="${mailtoReply}" style="background:#111;color:#fff;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
+        <a href="${mailtoReply}" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Responder por mail
         </a>
       </p>
       <p style="margin-top:8px;">
-        <a href="${SITE_URL}/admin" style="color:#111;">O responder desde el panel de administración →</a>
+        <a href="${SITE_URL}/admin" style="color:#ccc;">O responder desde el panel de administración →</a>
       </p>
     `),
   };
@@ -155,7 +163,7 @@ export function emailRespuestaConsulta(mensajeOriginal: string, respuesta: strin
     subject: "Respuesta a tu consulta — Monje Urbano Libre",
     html: ENVOLTORIO(`
       <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Tu consulta</h2>
-      <p style="color:#888;white-space:pre-wrap;border-left:2px solid #ddd;padding-left:14px;">${mensajeOriginal}</p>
+      <p style="color:#999;white-space:pre-wrap;border-left:2px solid #444;padding-left:14px;">${mensajeOriginal}</p>
       <h2 style="margin:24px 0 12px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Respuesta</h2>
       <p style="white-space:pre-wrap;">${respuesta}</p>
     `),
@@ -177,11 +185,11 @@ export function emailLinkRegalo(compra: CompraParaEmail): { subject: string; htm
         Ya está todo pago — solo falta que completes tu historia para que empecemos.
       </p>
       <p style="text-align:center;margin:32px 0;">
-        <a href="${link}" style="background:#111;color:#fff;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
+        <a href="${link}" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Completar mi formulario
         </a>
       </p>
-      <p style="font-size:13px;color:#666;">Si el botón no funciona, copiá y pegá este link en tu navegador:<br>${link}</p>
+      <p style="font-size:13px;color:#999;">Si el botón no funciona, copiá y pegá este link en tu navegador:<br>${link}</p>
     `),
   };
 }
