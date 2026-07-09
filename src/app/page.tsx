@@ -5,6 +5,12 @@ import TestimonialTeaser from "@/components/semillas/TestimonialTeaser";
 import NewsletterForm from "@/components/NewsletterForm";
 import ContactForm from "@/components/ContactForm";
 import RevealObserver from "@/components/RevealObserver";
+import ProductCarousel from "@/components/ProductCarousel";
+
+// Nombres de archivo dentro de public/productos/<producto>/ — se van sumando
+// a mano a medida que lleguen más fotos, no hace falta tocar nada más.
+const FOTOS_TALISMAN = ["/productos/talisman/1.jpg"];
+const FOTOS_PORTA_SAHUMERIO = ["/productos/porta-sahumerio/1.jpg"];
 
 export default function Home() {
   return (
@@ -371,8 +377,8 @@ export default function Home() {
           </div>
 
           <div className="prod-detail-grid">
-            <div className="reveal-left prod-photo-placeholder" aria-hidden="true">
-              <span>Foto del producto próximamente</span>
+            <div className="reveal-left">
+              <ProductCarousel images={FOTOS_TALISMAN} alt="Talismán del Monje Urbano Libre" />
             </div>
             <div className="reveal-right">
               <h3 style={{ marginTop: 0 }}>Qué es</h3>
@@ -475,8 +481,8 @@ export default function Home() {
           </div>
 
           <div className="prod-detail-grid">
-            <div className="reveal-left prod-photo-placeholder" aria-hidden="true">
-              <span>Foto del producto próximamente</span>
+            <div className="reveal-left">
+              <ProductCarousel images={FOTOS_PORTA_SAHUMERIO} alt="Porta Sahumerio Invertido del Monje Urbano Libre" />
             </div>
             <div className="reveal-right">
               <p style={{ marginTop: 0 }}>Cada pieza es una invitación al ritual.</p>
