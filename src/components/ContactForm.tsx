@@ -29,6 +29,15 @@ export default function ContactForm() {
         return;
       }
     }
+
+    // El aviso por mail no debe bloquear la confirmación al usuario si falla
+    // (la consulta ya quedó guardada, que es lo importante).
+    fetch("/api/consultas/notificar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ servicio: asunto, nombre, email, mensaje }),
+    }).catch((err) => console.error("aviso de consulta falló:", err));
+
     setStatus("sent");
     form.reset();
   }
