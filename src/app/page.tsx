@@ -8,9 +8,23 @@ import RevealObserver from "@/components/RevealObserver";
 import ProductCarousel from "@/components/ProductCarousel";
 
 // Nombres de archivo dentro de public/productos/<producto>/ — se van sumando
-// a mano a medida que lleguen más fotos, no hace falta tocar nada más.
-const FOTOS_TALISMAN = ["/productos/talisman/1.jpg"];
-const FOTOS_PORTA_SAHUMERIO = ["/productos/porta-sahumerio/1.jpg"];
+// a mano a medida que lleguen más fotos, no hace falta tocar nada más. El
+// primero de cada lista es la foto principal, se muestra primero en el carrusel.
+const FOTOS_TALISMAN = [
+  "/productos/talisman/1.png",
+  "/productos/talisman/2.png",
+  "/productos/talisman/3.png",
+  "/productos/talisman/4.png",
+  "/productos/talisman/5.png",
+  "/productos/talisman/6.png",
+  "/productos/talisman/7.png",
+  "/productos/talisman/8.png",
+];
+const FOTOS_PORTA_SAHUMERIO = [
+  "/productos/porta-sahumerio/1.png",
+  "/productos/porta-sahumerio/2.png",
+  "/productos/porta-sahumerio/3.png",
+];
 
 export default function Home() {
   return (
