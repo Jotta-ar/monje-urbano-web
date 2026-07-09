@@ -47,20 +47,40 @@ const ENVOLTORIO = (contenido: string) => `<!DOCTYPE html>
       }
       h2 { font-family: 'Pirata One', Georgia, serif; font-size: 32px; font-weight: normal; color: #fff; }
       p { font-family: 'Pompiere', Georgia, serif; font-size: 20px; line-height: 1.6; color: #eee; }
+      /* Gmail ignora los meta color-scheme de arriba y le aplica su propio
+         modo oscuro automático a esta tarjeta (que ya es oscura), invirtiéndola
+         a blanca. Estas reglas apuntan a los hooks que Gmail agrega en sus
+         propios elementos ([data-ogsc]/[data-ogsb]) para forzar de vuelta
+         nuestra paleta real — sin esto, en la app de Gmail se ve invertida. */
+      [data-ogsc] .bg-fondo, [data-ogsb] .bg-fondo { background-color: #000000 !important; }
+      [data-ogsc] .bg-tarjeta, [data-ogsb] .bg-tarjeta { background-color: #161616 !important; }
+      [data-ogsc] h2, [data-ogsb] h2 { color: #ffffff !important; }
+      [data-ogsc] p, [data-ogsb] p { color: #eeeeee !important; }
+      [data-ogsc] .texto-tenue, [data-ogsb] .texto-tenue { color: #999999 !important; }
+      [data-ogsc] .link-tenue, [data-ogsb] .link-tenue { color: #cccccc !important; }
+      [data-ogsc] .boton-cta, [data-ogsb] .boton-cta { background-color: #ffffff !important; color: #111111 !important; }
     </style>
   </head>
-  <body style="margin:0;background:#000;">
-    <div style="background:#000;padding:40px 20px;font-family:'Pompiere',Georgia,serif;font-size:20px;line-height:1.6;color:#eee;">
-      <div style="max-width:520px;margin:0 auto;background:#161616;border-radius:4px;padding:36px 32px;color:#eee;">
-        <div style="text-align:center;margin-bottom:24px;">
-          <img src="${SITE_URL}/logos/logo-completo-blanco.png" alt="Monje Urbano Libre" width="280" style="max-width:280px;height:auto;" />
-        </div>
-        ${contenido}
-        <p style="margin-top:32px;font-family:'Pirata One',Georgia,serif;font-size:16px;color:#888;text-align:center;">
-          Monje Urbano Libre — Silencio, presencia y propósito.
-        </p>
-      </div>
-    </div>
+  <body style="margin:0;background-color:#000000;" bgcolor="#000000">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#000000" class="bg-fondo" style="background-color:#000000;">
+      <tr>
+        <td align="center" style="padding:40px 20px;">
+          <table role="presentation" width="520" cellpadding="0" cellspacing="0" border="0" bgcolor="#161616" class="bg-tarjeta" style="width:100%;max-width:520px;background-color:#161616;border-radius:4px;">
+            <tr>
+              <td style="padding:36px 32px;font-family:'Pompiere',Georgia,serif;font-size:20px;line-height:1.6;color:#eee;">
+                <div style="text-align:center;margin-bottom:24px;">
+                  <img src="${SITE_URL}/logos/logo-completo-blanco.png" alt="Monje Urbano Libre" width="280" style="max-width:280px;height:auto;" />
+                </div>
+                ${contenido}
+                <p class="texto-tenue" style="margin-top:32px;font-family:'Pirata One',Georgia,serif;font-size:16px;color:#888;text-align:center;">
+                  Monje Urbano Libre — Silencio, presencia y propósito.
+                </p>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
 `;
@@ -86,7 +106,7 @@ export function emailAvisoAdmin(compra: CompraParaEmail): { subject: string; htm
           : `<p>El formulario ya está completo, listo para trabajar.</p>`
       }
       <p style="margin-top:24px;">
-        <a href="${SITE_URL}/admin" style="color:#ccc;">Ver en el panel de administración →</a>
+        <a href="${SITE_URL}/admin" class="link-tenue" style="color:#ccc;">Ver en el panel de administración →</a>
       </p>
     `),
   };
@@ -123,7 +143,7 @@ export function emailGraciasComprador(compra: CompraParaEmail): { subject: strin
           : `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya está todo listo de tu lado —
              me pongo en marcha y te contacto para los próximos pasos.</p>`
       }
-      <p style="margin-top:24px;font-family:'Pirata One',Georgia,serif;font-size:20px;color:#aaa;">Silencio, presencia y propósito.</p>
+      <p class="texto-tenue" style="margin-top:24px;font-family:'Pirata One',Georgia,serif;font-size:20px;color:#aaa;">Silencio, presencia y propósito.</p>
     `),
   };
 }
@@ -162,12 +182,12 @@ export function emailAvisoConsulta(consulta: ConsultaParaEmail): { subject: stri
       <p style="margin-top:16px;"><strong>Consulta:</strong></p>
       <p style="white-space:pre-wrap;">${consulta.mensaje}</p>
       <p style="text-align:center;margin:32px 0;">
-        <a href="${mailtoReply}" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
+        <a href="${mailtoReply}" class="boton-cta" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Responder por mail
         </a>
       </p>
       <p style="margin-top:8px;">
-        <a href="${SITE_URL}/admin" style="color:#ccc;">O responder desde el panel de administración →</a>
+        <a href="${SITE_URL}/admin" class="link-tenue" style="color:#ccc;">O responder desde el panel de administración →</a>
       </p>
     `),
   };
@@ -179,7 +199,7 @@ export function emailRespuestaConsulta(mensajeOriginal: string, respuesta: strin
     subject: "Respuesta a tu consulta — Monje Urbano Libre",
     html: ENVOLTORIO(`
       <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Tu consulta</h2>
-      <p style="color:#999;white-space:pre-wrap;border-left:2px solid #444;padding-left:14px;">${mensajeOriginal}</p>
+      <p class="texto-tenue" style="color:#999;white-space:pre-wrap;border-left:2px solid #444;padding-left:14px;">${mensajeOriginal}</p>
       <h2 style="margin:24px 0 12px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Respuesta</h2>
       <p style="white-space:pre-wrap;">${respuesta}</p>
     `),
@@ -201,11 +221,11 @@ export function emailLinkRegalo(compra: CompraParaEmail): { subject: string; htm
         Ya está todo pago — solo falta que completes tu historia para que empecemos.
       </p>
       <p style="text-align:center;margin:32px 0;">
-        <a href="${link}" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
+        <a href="${link}" class="boton-cta" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Completar mi formulario
         </a>
       </p>
-      <p style="font-size:13px;color:#999;">Si el botón no funciona, copiá y pegá este link en tu navegador:<br>${link}</p>
+      <p class="texto-tenue" style="font-size:13px;color:#999;">Si el botón no funciona, copiá y pegá este link en tu navegador:<br>${link}</p>
     `),
   };
 }
