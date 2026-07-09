@@ -45,27 +45,34 @@ const ENVOLTORIO = (contenido: string) => `<!DOCTYPE html>
         font-family: 'Pompiere';
         src: url('${SITE_URL}/fonts/Pompiere-Regular.ttf') format('truetype');
       }
+      html, body { color-scheme: only light; }
       h2 { font-family: 'Pirata One', Georgia, serif; font-size: 32px; font-weight: normal; color: #fff; }
       p { font-family: 'Pompiere', Georgia, serif; font-size: 20px; line-height: 1.6; color: #eee; }
-      /* Gmail ignora los meta color-scheme de arriba y le aplica su propio
-         modo oscuro automático a esta tarjeta (que ya es oscura), invirtiéndola
-         a blanca. Estas reglas apuntan a los hooks que Gmail agrega en sus
-         propios elementos ([data-ogsc]/[data-ogsb]) para forzar de vuelta
-         nuestra paleta real — sin esto, en la app de Gmail se ve invertida. */
-      [data-ogsc] .bg-fondo, [data-ogsb] .bg-fondo { background-color: #000000 !important; }
-      [data-ogsc] .bg-tarjeta, [data-ogsb] .bg-tarjeta { background-color: #161616 !important; }
+      /* Varios clientes (Gmail, y también la app de Zoho) ignoran los meta
+         color-scheme de arriba y le aplican su propio modo oscuro automático
+         a esta tarjeta (que ya es oscura), invirtiéndola a blanca. Dos capas
+         de defensa:
+         1) el fondo va como linear-gradient con los dos extremos del MISMO
+            color en vez de background-color plano — estos motores de
+            "auto dark mode" buscan colores sólidos para invertir y no saben
+            interpretar un gradiente, así que lo dejan pasar tal cual.
+         2) estas reglas apuntan a los hooks que Gmail agrega en sus propios
+            elementos ([data-ogsc]/[data-ogsb]) para forzar de vuelta nuestra
+            paleta real, por si el gradiente no alcanza. */
+      [data-ogsc] .bg-fondo, [data-ogsb] .bg-fondo { background: #000000 !important; }
+      [data-ogsc] .bg-tarjeta, [data-ogsb] .bg-tarjeta { background: #161616 !important; }
       [data-ogsc] h2, [data-ogsb] h2 { color: #ffffff !important; }
       [data-ogsc] p, [data-ogsb] p { color: #eeeeee !important; }
       [data-ogsc] .texto-tenue, [data-ogsb] .texto-tenue { color: #999999 !important; }
       [data-ogsc] .link-tenue, [data-ogsb] .link-tenue { color: #cccccc !important; }
-      [data-ogsc] .boton-cta, [data-ogsb] .boton-cta { background-color: #ffffff !important; color: #111111 !important; }
+      [data-ogsc] .boton-cta, [data-ogsb] .boton-cta { background: #ffffff !important; color: #111111 !important; }
     </style>
   </head>
-  <body style="margin:0;background-color:#000000;" bgcolor="#000000">
-    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#000000" class="bg-fondo" style="background-color:#000000;">
+  <body style="margin:0;background:linear-gradient(#000000,#000000);">
+    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" class="bg-fondo" style="background:linear-gradient(#000000,#000000);">
       <tr>
         <td align="center" style="padding:40px 20px;">
-          <table role="presentation" width="520" cellpadding="0" cellspacing="0" border="0" bgcolor="#161616" class="bg-tarjeta" style="width:100%;max-width:520px;background-color:#161616;border-radius:4px;">
+          <table role="presentation" width="520" cellpadding="0" cellspacing="0" border="0" class="bg-tarjeta" style="width:100%;max-width:520px;background:linear-gradient(#161616,#161616);border-radius:4px;">
             <tr>
               <td style="padding:36px 32px;font-family:'Pompiere',Georgia,serif;font-size:20px;line-height:1.6;color:#eee;">
                 <div style="text-align:center;margin-bottom:24px;">
@@ -182,7 +189,7 @@ export function emailAvisoConsulta(consulta: ConsultaParaEmail): { subject: stri
       <p style="margin-top:16px;"><strong>Consulta:</strong></p>
       <p style="white-space:pre-wrap;">${consulta.mensaje}</p>
       <p style="text-align:center;margin:32px 0;">
-        <a href="${mailtoReply}" class="boton-cta" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
+        <a href="${mailtoReply}" class="boton-cta" style="background:linear-gradient(#fff,#fff);color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Responder por mail
         </a>
       </p>
@@ -221,7 +228,7 @@ export function emailLinkRegalo(compra: CompraParaEmail): { subject: string; htm
         Ya está todo pago — solo falta que completes tu historia para que empecemos.
       </p>
       <p style="text-align:center;margin:32px 0;">
-        <a href="${link}" class="boton-cta" style="background:#fff;color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
+        <a href="${link}" class="boton-cta" style="background:linear-gradient(#fff,#fff);color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Completar mi formulario
         </a>
       </p>
