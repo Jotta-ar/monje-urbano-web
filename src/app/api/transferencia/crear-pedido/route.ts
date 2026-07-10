@@ -7,7 +7,8 @@ import { emailAvisoTransferenciaPendiente } from "@/lib/emailTemplates";
 const ADMIN_EMAIL = process.env.NOTIFY_EMAIL || "pedidos@monjeurbanolibre.com";
 
 /**
- * Registra que un pedido en USD eligió pagar por transferencia bancaria —
+ * Registra que un pedido en USD eligió un método de pago manual —
+ * transferencia bancaria o USDT (misma mecánica, distinto dato a mostrar) —
  * no confirma el pago (eso lo hace el admin a mano desde /admin cuando ve
  * que el dinero entró, ver /api/admin/pedidos/[id]/confirmar-transferencia).
  * El monto se busca en `precios.monto_usd` del lado del servidor, igual que
@@ -22,6 +23,7 @@ export async function POST(req: NextRequest) {
   const body = await req.json().catch(() => ({}));
   const compraId = typeof body.compraId === "string" ? body.compraId : null;
   const comprobanteUrl = typeof body.comprobanteUrl === "string" ? body.comprobanteUrl : null;
+  const metodo = body.metodo === "usdt" ? "usdt" : "banco";
   if (!compraId) {
     return NextResponse.json({ error: "Falta compraId" }, { status: 400 });
   }
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
   const { error: updateError } = await supabaseAdmin
     .from("compras")
     .update({
-      pasarela: "transferencia",
+      pasarela: metodo === "usdt" ? "usdt" : "transferencia",
       monto: amount,
       ...(comprobanteUrl ? { comprobante_transferencia_url: comprobanteUrl } : {}),
     })
@@ -65,13 +67,14 @@ export async function POST(req: NextRequest) {
     console.error("transferencia: no se pudo marcar pasarela en la compra:", updateError);
   }
 
+  const configColumna = metodo === "usdt" ? "wallet_usdt_trc20" : "datos_transferencia_usd";
   const { data: config, error: configError } = await supabaseAdmin
     .from("configuracion")
-    .select("datos_transferencia_usd")
+    .select(configColumna)
     .eq("id", 1)
-    .maybeSingle();
+    .maybeSingle<Record<string, string | null>>();
   if (configError) {
-    console.error("transferencia: no se pudo leer configuracion (¿corriste migration_008?):", configError);
+    console.error("transferencia: no se pudo leer configuracion (¿corriste migration_008/009?):", configError);
   }
 
   await enviarEmail({
@@ -84,12 +87,14 @@ export async function POST(req: NextRequest) {
       compradorApellido: compra.comprador_apellido,
       compradorEmail: compra.comprador_email,
       tieneComprobante: !!comprobanteUrl,
+      metodo,
     }),
   });
 
   return NextResponse.json({
     token: compra.token,
-    datosTransferencia: config?.datos_transferencia_usd ?? null,
+    metodo,
+    datosTransferencia: config?.[configColumna] ?? null,
     amount,
     title: precio?.label ?? null,
   });

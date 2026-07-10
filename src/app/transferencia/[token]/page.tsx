@@ -13,6 +13,7 @@ export default function TransferenciaTokenPage() {
     datosTransferencia: string | null;
     tieneComprobante: boolean;
     pagado: boolean;
+    metodo: "banco" | "usdt";
   } | null>(null);
 
   useEffect(() => {
@@ -23,6 +24,7 @@ export default function TransferenciaTokenPage() {
           datosTransferencia: d.datosTransferencia,
           tieneComprobante: d.tieneComprobante,
           pagado: d.estado !== "pendiente_pago",
+          metodo: d.metodo === "usdt" ? "usdt" : "banco",
         });
         setEstado("listo");
       })
@@ -63,6 +65,7 @@ export default function TransferenciaTokenPage() {
         <TransferenciaInfo
           datosTransferencia={datos.datosTransferencia}
           token={token}
+          metodo={datos.metodo}
           tieneComprobanteInicial={datos.tieneComprobante}
         />
       )}

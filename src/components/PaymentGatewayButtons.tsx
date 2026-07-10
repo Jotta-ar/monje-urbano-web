@@ -3,15 +3,14 @@
 import { useEffect, useState } from "react";
 import type { Moneda } from "@/lib/compras";
 
-export type Pasarela = "mercadopago" | "paypal" | "transferencia";
+export type Pasarela = "mercadopago" | "paypal" | "transferencia" | "usdt";
 
 /**
  * Currency/gateway picker: ARS -> Mercado Pago (un solo botón "Pagar"), USD
- * -> PayPal o transferencia bancaria (dos botones, el cliente elige). La
- * moneda la decide sola la página según el país detectado por IP en
- * middleware.ts (guardado en la cookie "moneda") — no se muestra ningún
- * selector de moneda, cada visitante ve directo las opciones que le
- * corresponden.
+ * -> PayPal, transferencia bancaria o USDT (el cliente elige). La moneda la
+ * decide sola la página según el país detectado por IP en middleware.ts
+ * (guardado en la cookie "moneda") — no se muestra ningún selector de
+ * moneda, cada visitante ve directo las opciones que le corresponden.
  */
 export default function PaymentGatewayButtons({
   onPagar,
@@ -49,6 +48,9 @@ export default function PaymentGatewayButtons({
       </button>
       <button type="button" className="btn-outline" onClick={() => onPagar("USD", "transferencia")}>
         Transferencia bancaria
+      </button>
+      <button type="button" className="btn-outline" onClick={() => onPagar("USD", "usdt")}>
+        Pagar con USDT
       </button>
     </div>
   );

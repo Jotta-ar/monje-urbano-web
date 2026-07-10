@@ -105,7 +105,7 @@ function AdminTabs({ session }: { session: Session }) {
           style={{ padding: "8px 22px" }}
           onClick={() => setTab("transferencia")}
         >
-          Transferencia USD
+          Transferencia / USDT
         </button>
       </div>
 
@@ -121,67 +121,95 @@ function AdminTabs({ session }: { session: Session }) {
 
 function TransferenciaConfigPanel() {
   const [datos, setDatos] = useState("");
+  const [walletUsdt, setWalletUsdt] = useState("");
   const [cargado, setCargado] = useState(false);
-  const [guardado, setGuardado] = useState(false);
+  const [guardadoId, setGuardadoId] = useState<"banco" | "usdt" | null>(null);
   const [saveError, setSaveError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!supabase) return;
     supabase
       .from("configuracion")
-      .select("datos_transferencia_usd")
+      .select("datos_transferencia_usd, wallet_usdt_trc20")
       .eq("id", 1)
       .maybeSingle()
       .then(({ data }) => {
         setDatos(data?.datos_transferencia_usd ?? "");
+        setWalletUsdt(data?.wallet_usdt_trc20 ?? "");
         setCargado(true);
       });
   }, []);
 
-  async function handleGuardar() {
+  async function handleGuardar(campo: "banco" | "usdt") {
     if (!supabase) return;
     setSaveError(null);
     const { error } = await supabase
       .from("configuracion")
-      .update({ datos_transferencia_usd: datos, actualizado_en: new Date().toISOString() })
+      .update(
+        campo === "banco"
+          ? { datos_transferencia_usd: datos, actualizado_en: new Date().toISOString() }
+          : { wallet_usdt_trc20: walletUsdt, actualizado_en: new Date().toISOString() }
+      )
       .eq("id", 1);
     if (error) {
       console.error("configuracion update failed:", error);
       setSaveError(error.message);
       return;
     }
-    setGuardado(true);
-    setTimeout(() => setGuardado(false), 1500);
+    setGuardadoId(campo);
+    setTimeout(() => setGuardadoId(null), 1500);
   }
 
   return (
     <div>
       <div className="form-header">
-        <h1>Transferencia bancaria (USD)</h1>
-        <p>Estos datos se le muestran a cualquier cliente del exterior que elija pagar por transferencia.</p>
+        <h1>Transferencia / USDT (USD)</h1>
+        <p>Estos datos se le muestran a cualquier cliente del exterior que elija pagar por transferencia o cripto.</p>
       </div>
       {!cargado ? (
         <p style={{ color: "#888" }}>Cargando…</p>
       ) : (
-        <div className="form-section">
-          <div className="form-group">
-            <label>Datos de la cuenta bancaria</label>
-            <textarea
-              rows={8}
-              value={datos}
-              onChange={(e) => setDatos(e.target.value)}
-              placeholder="Banco, número de cuenta, routing number, SWIFT, titular, dirección..."
-            />
-            <p className="hint">
-              Mientras esto quede vacío, el cliente ve un mensaje avisando que le vamos a mandar los
-              datos por WhatsApp o mail.
-            </p>
+        <>
+          <div className="form-section">
+            <div className="form-group">
+              <label>Datos de la cuenta bancaria</label>
+              <textarea
+                rows={8}
+                value={datos}
+                onChange={(e) => setDatos(e.target.value)}
+                placeholder="Banco, número de cuenta, routing number, SWIFT, titular, dirección..."
+              />
+              <p className="hint">
+                Mientras esto quede vacío, el cliente ve un mensaje avisando que le vamos a mandar los
+                datos por WhatsApp o mail.
+              </p>
+            </div>
+            <button type="button" className="btn-secondary" onClick={() => handleGuardar("banco")}>
+              {guardadoId === "banco" ? "Guardado ✓" : "Guardar"}
+            </button>
           </div>
-          <button type="button" className="btn-secondary" onClick={handleGuardar}>
-            {guardado ? "Guardado ✓" : "Guardar"}
-          </button>
+
+          <div className="form-section">
+            <div className="form-group">
+              <label>Wallet USDT (red TRC20)</label>
+              <input
+                type="text"
+                value={walletUsdt}
+                onChange={(e) => setWalletUsdt(e.target.value)}
+                placeholder="Dirección de wallet TRC20 (Tron)"
+              />
+              <p className="hint">
+                Usá una dirección de la red TRC20 — es la que tiene comisiones más bajas para el
+                cliente. Mientras quede vacío, ve el mismo mensaje de "te contactamos" que la transferencia.
+              </p>
+            </div>
+            <button type="button" className="btn-secondary" onClick={() => handleGuardar("usdt")}>
+              {guardadoId === "usdt" ? "Guardado ✓" : "Guardar"}
+            </button>
+          </div>
+
           {saveError && <p style={{ color: "#e88", marginTop: 8 }}>{saveError}</p>}
-        </div>
+        </>
       )}
     </div>
   );
@@ -662,7 +690,9 @@ function PedidoRow({
     ? `${p.destinatario_nombre ?? "?"} ${p.destinatario_apellido ?? ""} (regalo de ${p.comprador_nombre ?? "?"})`
     : `${p.comprador_nombre ?? "?"} ${p.comprador_apellido ?? ""}`;
   const formularioListo = p.estado === "completado";
-  const esperandoTransferencia = p.pasarela === "transferencia" && p.estado === "pendiente_pago";
+  const esperandoPagoManual =
+    (p.pasarela === "transferencia" || p.pasarela === "usdt") && p.estado === "pendiente_pago";
+  const etiquetaPagoManual = p.pasarela === "usdt" ? "Esperando USDT" : "Esperando transferencia";
 
   return (
     <div
@@ -676,10 +706,10 @@ function PedidoRow({
         </h2>
         <p style={{ color: "#999", fontSize: "0.85rem", margin: 0 }}>{nombre}</p>
         <p style={{ color: "#777", fontSize: "0.8rem", margin: "4px 0 0" }}>
-          {esperandoTransferencia ? "Esperando transferencia" : ESTADO_LABELS[p.estado] ?? p.estado} ·{" "}
+          {esperandoPagoManual ? etiquetaPagoManual : ESTADO_LABELS[p.estado] ?? p.estado} ·{" "}
           {new Date(p.creado_en).toLocaleString("es-AR")}
           {p.monto ? ` · ${p.monto} ${p.moneda}` : ""}
-          {esperandoTransferencia && p.comprobante_transferencia_url ? " · comprobante adjunto en el PDF" : ""}
+          {esperandoPagoManual && p.comprobante_transferencia_url ? " · comprobante adjunto en el PDF" : ""}
         </p>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -696,10 +726,10 @@ function PedidoRow({
             Enviado
           </label>
         )}
-        {esperandoTransferencia && (
+        {esperandoPagoManual && (
           <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", color: "#ccc" }}>
             <input type="checkbox" checked={false} onChange={() => onConfirmarTransferencia(p.id)} />
-            Confirmar transferencia recibida
+            Confirmar {p.pasarela === "usdt" ? "USDT recibido" : "transferencia recibida"}
           </label>
         )}
       </div>

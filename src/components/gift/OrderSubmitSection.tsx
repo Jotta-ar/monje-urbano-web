@@ -20,9 +20,11 @@ export default function OrderSubmitSection({
 }) {
   const { mode } = useGiftMode();
   const [status, setStatus] = useState<"idle" | "enviando" | "listo" | "transferencia" | "error">("idle");
-  const [transferencia, setTransferencia] = useState<{ token: string; datosTransferencia: string | null } | null>(
-    null
-  );
+  const [transferencia, setTransferencia] = useState<{
+    token: string;
+    datosTransferencia: string | null;
+    metodo: "banco" | "usdt";
+  } | null>(null);
 
   async function handlePagar(moneda: Moneda, pasarela: Pasarela) {
     const form = getForm();
@@ -85,11 +87,12 @@ export default function OrderSubmitSection({
         return;
       }
 
-      // pasarela === "transferencia"
+      // pasarela === "transferencia" | "usdt"
+      const metodo = pasarela === "usdt" ? "usdt" : "banco";
       const resp = await fetch("/api/transferencia/crear-pedido", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ compraId: id }),
+        body: JSON.stringify({ compraId: id, metodo }),
       });
       const data = await resp.json();
       if (!resp.ok) {
@@ -97,7 +100,7 @@ export default function OrderSubmitSection({
         setStatus("error");
         return;
       }
-      setTransferencia({ token: data.token, datosTransferencia: data.datosTransferencia });
+      setTransferencia({ token: data.token, datosTransferencia: data.datosTransferencia, metodo });
       setStatus("transferencia");
     } catch (err) {
       console.error("handlePagar failed:", err);
@@ -122,6 +125,7 @@ export default function OrderSubmitSection({
       <TransferenciaInfo
         datosTransferencia={transferencia.datosTransferencia}
         token={transferencia.token}
+        metodo={transferencia.metodo}
       />
     );
   }

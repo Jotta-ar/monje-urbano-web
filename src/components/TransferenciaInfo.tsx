@@ -12,10 +12,12 @@ import { subirArchivo } from "@/lib/storage";
 export default function TransferenciaInfo({
   datosTransferencia,
   token,
+  metodo = "banco",
   tieneComprobanteInicial = false,
 }: {
   datosTransferencia: string | null;
   token: string;
+  metodo?: "banco" | "usdt";
   tieneComprobanteInicial?: boolean;
 }) {
   const [subiendo, setSubiendo] = useState(false);
@@ -55,13 +57,16 @@ export default function TransferenciaInfo({
 
   return (
     <div className="purchase-section">
-      <h3 style={{ marginTop: 0 }}>Datos para la transferencia</h3>
+      <h3 style={{ marginTop: 0 }}>
+        {metodo === "usdt" ? "Dirección para transferir USDT (TRC20)" : "Datos para la transferencia"}
+      </h3>
       {datosTransferencia ? (
         <p style={{ whiteSpace: "pre-wrap", color: "#eee" }}>{datosTransferencia}</p>
       ) : (
         <p style={{ color: "#ccc" }}>
-          Todavía estamos configurando la cuenta bancaria en EEUU — te vamos a escribir por
-          WhatsApp o mail con los datos para que completes la transferencia.
+          {metodo === "usdt"
+            ? "Todavía estamos configurando la wallet de USDT — te vamos a escribir por WhatsApp o mail con la dirección para que completes el envío."
+            : "Todavía estamos configurando la cuenta bancaria en EEUU — te vamos a escribir por WhatsApp o mail con los datos para que completes la transferencia."}
         </p>
       )}
 

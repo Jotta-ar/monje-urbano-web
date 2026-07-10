@@ -26,21 +26,24 @@ export async function GET(
   if (error) {
     console.error("transferencia [token] GET falló:", error);
   }
-  if (error || !compra || compra.pasarela !== "transferencia") {
+  if (error || !compra || (compra.pasarela !== "transferencia" && compra.pasarela !== "usdt")) {
     return NextResponse.json({ error: "No encontrado" }, { status: 404 });
   }
 
+  const metodo = compra.pasarela === "usdt" ? "usdt" : "banco";
+  const configColumna = metodo === "usdt" ? "wallet_usdt_trc20" : "datos_transferencia_usd";
   const { data: config } = await supabaseAdmin
     .from("configuracion")
-    .select("datos_transferencia_usd")
+    .select(configColumna)
     .eq("id", 1)
-    .maybeSingle();
+    .maybeSingle<Record<string, string | null>>();
 
   return NextResponse.json({
     servicio: compra.servicio,
     estado: compra.estado,
+    metodo,
     tieneComprobante: !!compra.comprobante_transferencia_url,
-    datosTransferencia: config?.datos_transferencia_usd ?? null,
+    datosTransferencia: config?.[configColumna] ?? null,
   });
 }
 
@@ -64,7 +67,7 @@ export async function POST(
     .eq("token", token)
     .maybeSingle();
 
-  if (!existente || existente.pasarela !== "transferencia") {
+  if (!existente || (existente.pasarela !== "transferencia" && existente.pasarela !== "usdt")) {
     return NextResponse.json({ error: "No encontrado" }, { status: 404 });
   }
 

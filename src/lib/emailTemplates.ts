@@ -133,9 +133,10 @@ type TransferenciaPendienteParaEmail = {
   compradorApellido: string | null;
   compradorEmail: string | null;
   tieneComprobante: boolean;
+  metodo: "banco" | "usdt";
 };
 
-/** Aviso interno: le llega al admin cuando alguien elige pagar por transferencia — no confirma el pago, solo avisa que hay que estar atento y confirmarlo a mano en /admin cuando entre el dinero. */
+/** Aviso interno: le llega al admin cuando alguien elige un método de pago manual (transferencia bancaria o USDT) — no confirma el pago, solo avisa que hay que estar atento y confirmarlo a mano en /admin cuando entre el dinero. */
 export function emailAvisoTransferenciaPendiente(
   compra: TransferenciaPendienteParaEmail
 ): { subject: string; html: string } {
@@ -143,11 +144,14 @@ export function emailAvisoTransferenciaPendiente(
   const comprador =
     [compra.compradorNombre, compra.compradorApellido].filter(Boolean).join(" ") || "—";
   const monto = compra.monto != null ? `USD ${compra.monto.toLocaleString("en-US")}` : "A confirmar";
+  const nombreMetodo = compra.metodo === "usdt" ? "USDT" : "transferencia";
 
   return {
-    subject: `Pedido #${compra.numero} — esperando transferencia — ${titulo}`,
+    subject: `Pedido #${compra.numero} — esperando ${nombreMetodo} — ${titulo}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">Transferencia pendiente</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">${
+        compra.metodo === "usdt" ? "Pago en USDT pendiente" : "Transferencia pendiente"
+      }</h2>
       <p style="color:#eee;"><strong>Pedido:</strong> #${compra.numero}</p>
       <p style="color:#eee;"><strong>Servicio:</strong> ${titulo}</p>
       <p style="color:#eee;"><strong>Monto:</strong> ${monto}</p>
@@ -157,7 +161,9 @@ export function emailAvisoTransferenciaPendiente(
           ? "Ya subió un comprobante — vas a poder verlo dentro del PDF del pedido."
           : "Todavía no subió comprobante — puede que lo suba más tarde con el link de su pedido."
       }</p>
-      <p style="margin-top:16px;color:#eee;">Este pedido queda como pendiente hasta que confirmes a mano que el dinero entró — desde el panel, tildá "Confirmar transferencia recibida" en su fila.</p>
+      <p style="margin-top:16px;color:#eee;">Este pedido queda como pendiente hasta que confirmes a mano que ${
+        compra.metodo === "usdt" ? "llegó el USDT" : "el dinero entró"
+      } — desde el panel, tildá "Confirmar transferencia recibida" en su fila.</p>
       <p style="margin-top:24px;color:#eee;">
         <a href="${SITE_URL}/admin" class="link-tenue" style="color:#ccc;">Ver en el panel de administración →</a>
       </p>
