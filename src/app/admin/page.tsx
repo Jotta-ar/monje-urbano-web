@@ -27,6 +27,8 @@ interface Pedido {
   destinatario_apellido: string | null;
   moneda: string;
   monto: number | null;
+  pasarela: string | null;
+  comprobante_transferencia_url: string | null;
   enviado: boolean;
   creado_en: string;
 }
@@ -50,7 +52,9 @@ export default function AdminPage() {
 }
 
 function AdminTabs({ session }: { session: Session }) {
-  const [tab, setTab] = useState<"precios" | "pedidos" | "regalar" | "pago-prueba" | "consultas">("pedidos");
+  const [tab, setTab] = useState<
+    "precios" | "pedidos" | "regalar" | "pago-prueba" | "consultas" | "transferencia"
+  >("pedidos");
 
   return (
     <div className="form-plain" style={{ maxWidth: 1000 }}>
@@ -95,6 +99,14 @@ function AdminTabs({ session }: { session: Session }) {
         >
           Consultas
         </button>
+        <button
+          type="button"
+          className={tab === "transferencia" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("transferencia")}
+        >
+          Transferencia USD
+        </button>
       </div>
 
       {tab === "pedidos" && <PedidosPanel session={session} />}
@@ -102,6 +114,75 @@ function AdminTabs({ session }: { session: Session }) {
       {tab === "precios" && <PreciosPanel />}
       {tab === "pago-prueba" && <PagoPruebaPanel session={session} />}
       {tab === "consultas" && <ConsultasPanel session={session} />}
+      {tab === "transferencia" && <TransferenciaConfigPanel />}
+    </div>
+  );
+}
+
+function TransferenciaConfigPanel() {
+  const [datos, setDatos] = useState("");
+  const [cargado, setCargado] = useState(false);
+  const [guardado, setGuardado] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!supabase) return;
+    supabase
+      .from("configuracion")
+      .select("datos_transferencia_usd")
+      .eq("id", 1)
+      .maybeSingle()
+      .then(({ data }) => {
+        setDatos(data?.datos_transferencia_usd ?? "");
+        setCargado(true);
+      });
+  }, []);
+
+  async function handleGuardar() {
+    if (!supabase) return;
+    setSaveError(null);
+    const { error } = await supabase
+      .from("configuracion")
+      .update({ datos_transferencia_usd: datos, actualizado_en: new Date().toISOString() })
+      .eq("id", 1);
+    if (error) {
+      console.error("configuracion update failed:", error);
+      setSaveError(error.message);
+      return;
+    }
+    setGuardado(true);
+    setTimeout(() => setGuardado(false), 1500);
+  }
+
+  return (
+    <div>
+      <div className="form-header">
+        <h1>Transferencia bancaria (USD)</h1>
+        <p>Estos datos se le muestran a cualquier cliente del exterior que elija pagar por transferencia.</p>
+      </div>
+      {!cargado ? (
+        <p style={{ color: "#888" }}>Cargando…</p>
+      ) : (
+        <div className="form-section">
+          <div className="form-group">
+            <label>Datos de la cuenta bancaria</label>
+            <textarea
+              rows={8}
+              value={datos}
+              onChange={(e) => setDatos(e.target.value)}
+              placeholder="Banco, número de cuenta, routing number, SWIFT, titular, dirección..."
+            />
+            <p className="hint">
+              Mientras esto quede vacío, el cliente ve un mensaje avisando que le vamos a mandar los
+              datos por WhatsApp o mail.
+            </p>
+          </div>
+          <button type="button" className="btn-secondary" onClick={handleGuardar}>
+            {guardado ? "Guardado ✓" : "Guardar"}
+          </button>
+          {saveError && <p style={{ color: "#e88", marginTop: 8 }}>{saveError}</p>}
+        </div>
+      )}
     </div>
   );
 }
@@ -455,6 +536,18 @@ function PedidosPanel({ session }: { session: Session }) {
     }
   }
 
+  async function confirmarTransferencia(id: string) {
+    const res = await fetch(`/api/admin/pedidos/${id}/confirmar-transferencia`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${token}` },
+    });
+    if (!res.ok) {
+      setError("No se pudo confirmar la transferencia, probá de nuevo.");
+      return;
+    }
+    cargar();
+  }
+
   async function descargarPdf(pedido: Pedido) {
     const res = await fetch(`/api/admin/pedidos/${pedido.id}/pdf`, {
       headers: { Authorization: `Bearer ${token}` },
@@ -525,7 +618,7 @@ function PedidosPanel({ session }: { session: Session }) {
                 Pedidos para hacer ({paraHacer.length})
               </h3>
               {paraHacer.map((p) => (
-                <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} />
+                <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} onConfirmarTransferencia={confirmarTransferencia} />
               ))}
             </>
           )}
@@ -540,14 +633,14 @@ function PedidosPanel({ session }: { session: Session }) {
                 destinatario desde la pestaña &quot;Regalar&quot; para recordarle completarlo.
               </p>
               {regalosPendientes.map((p) => (
-                <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} />
+                <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} onConfirmarTransferencia={confirmarTransferencia} />
               ))}
             </>
           )}
         </>
       ) : (
         visibles.map((p) => (
-          <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} />
+          <PedidoRow key={p.id} pedido={p} onDescargarPdf={descargarPdf} onMarcarEnviado={marcarEnviado} onConfirmarTransferencia={confirmarTransferencia} />
         ))
       )}
     </div>
@@ -558,15 +651,18 @@ function PedidoRow({
   pedido: p,
   onDescargarPdf,
   onMarcarEnviado,
+  onConfirmarTransferencia,
 }: {
   pedido: Pedido;
   onDescargarPdf: (pedido: Pedido) => void;
   onMarcarEnviado: (id: string, enviado: boolean) => void;
+  onConfirmarTransferencia: (id: string) => void;
 }) {
   const nombre = p.es_regalo
     ? `${p.destinatario_nombre ?? "?"} ${p.destinatario_apellido ?? ""} (regalo de ${p.comprador_nombre ?? "?"})`
     : `${p.comprador_nombre ?? "?"} ${p.comprador_apellido ?? ""}`;
   const formularioListo = p.estado === "completado";
+  const esperandoTransferencia = p.pasarela === "transferencia" && p.estado === "pendiente_pago";
 
   return (
     <div
@@ -580,8 +676,10 @@ function PedidoRow({
         </h2>
         <p style={{ color: "#999", fontSize: "0.85rem", margin: 0 }}>{nombre}</p>
         <p style={{ color: "#777", fontSize: "0.8rem", margin: "4px 0 0" }}>
-          {ESTADO_LABELS[p.estado] ?? p.estado} · {new Date(p.creado_en).toLocaleString("es-AR")}
+          {esperandoTransferencia ? "Esperando transferencia" : ESTADO_LABELS[p.estado] ?? p.estado} ·{" "}
+          {new Date(p.creado_en).toLocaleString("es-AR")}
           {p.monto ? ` · ${p.monto} ${p.moneda}` : ""}
+          {esperandoTransferencia && p.comprobante_transferencia_url ? " · comprobante adjunto en el PDF" : ""}
         </p>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 14 }}>
@@ -596,6 +694,12 @@ function PedidoRow({
               onChange={(e) => onMarcarEnviado(p.id, e.target.checked)}
             />
             Enviado
+          </label>
+        )}
+        {esperandoTransferencia && (
+          <label style={{ display: "flex", alignItems: "center", gap: 6, fontSize: "0.85rem", color: "#ccc" }}>
+            <input type="checkbox" checked={false} onChange={() => onConfirmarTransferencia(p.id)} />
+            Confirmar transferencia recibida
           </label>
         )}
       </div>

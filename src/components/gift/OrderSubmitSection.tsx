@@ -2,7 +2,8 @@
 
 import { useState } from "react";
 import { useGiftMode } from "./GiftModeContext";
-import PaymentGatewayButtons from "@/components/PaymentGatewayButtons";
+import PaymentGatewayButtons, { type Pasarela } from "@/components/PaymentGatewayButtons";
+import TransferenciaInfo from "@/components/TransferenciaInfo";
 import { crearCompra, type Moneda } from "@/lib/compras";
 import { formDataToObjectConArchivos } from "@/lib/formData";
 
@@ -18,9 +19,12 @@ export default function OrderSubmitSection({
   modalidadField?: string;
 }) {
   const { mode } = useGiftMode();
-  const [status, setStatus] = useState<"idle" | "enviando" | "listo" | "error">("idle");
+  const [status, setStatus] = useState<"idle" | "enviando" | "listo" | "transferencia" | "error">("idle");
+  const [transferencia, setTransferencia] = useState<{ token: string; datosTransferencia: string | null } | null>(
+    null
+  );
 
-  async function handlePagar(moneda: Moneda) {
+  async function handlePagar(moneda: Moneda, pasarela: Pasarela) {
     const form = getForm();
     if (!form) return;
     if (!form.reportValidity()) return;
@@ -49,25 +53,52 @@ export default function OrderSubmitSection({
         return;
       }
 
-      if (moneda !== "ARS") {
-        // El pago en USD todavía no tiene pasarela conectada.
-        setStatus("listo");
+      if (pasarela === "mercadopago") {
+        const resp = await fetch("/api/mercadopago/crear-preferencia", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ compraId: id }),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.initPoint) {
+          console.error("crear-preferencia failed:", data.error);
+          setStatus("error");
+          return;
+        }
+        window.location.href = data.initPoint;
         return;
       }
 
-      const resp = await fetch("/api/mercadopago/crear-preferencia", {
+      if (pasarela === "paypal") {
+        const resp = await fetch("/api/paypal/crear-orden", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ compraId: id }),
+        });
+        const data = await resp.json();
+        if (!resp.ok || !data.initPoint) {
+          console.error("crear-orden PayPal failed:", data.error);
+          setStatus("error");
+          return;
+        }
+        window.location.href = data.initPoint;
+        return;
+      }
+
+      // pasarela === "transferencia"
+      const resp = await fetch("/api/transferencia/crear-pedido", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ compraId: id }),
       });
       const data = await resp.json();
-      if (!resp.ok || !data.initPoint) {
-        console.error("crear-preferencia failed:", data.error);
+      if (!resp.ok) {
+        console.error("crear-pedido transferencia failed:", data.error);
         setStatus("error");
         return;
       }
-
-      window.location.href = data.initPoint;
+      setTransferencia({ token: data.token, datosTransferencia: data.datosTransferencia });
+      setStatus("transferencia");
     } catch (err) {
       console.error("handlePagar failed:", err);
       setStatus("error");
@@ -83,6 +114,15 @@ export default function OrderSubmitSection({
         </p>
         <button className="btn-secondary" onClick={() => setStatus("idle")}>Volver a intentar</button>
       </div>
+    );
+  }
+
+  if (status === "transferencia" && transferencia) {
+    return (
+      <TransferenciaInfo
+        datosTransferencia={transferencia.datosTransferencia}
+        token={transferencia.token}
+      />
     );
   }
 

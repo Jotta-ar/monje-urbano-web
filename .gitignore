@@ -40,3 +40,6 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# graphify (herramienta local de análisis del código, no forma parte del sitio)
+/graphify-out/

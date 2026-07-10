@@ -119,6 +119,46 @@ export function emailAvisoAdmin(compra: CompraParaEmail): { subject: string; htm
   };
 }
 
+type TransferenciaPendienteParaEmail = {
+  numero: number;
+  servicio: string;
+  monto: number | null;
+  compradorNombre: string | null;
+  compradorApellido: string | null;
+  compradorEmail: string | null;
+  tieneComprobante: boolean;
+};
+
+/** Aviso interno: le llega al admin cuando alguien elige pagar por transferencia — no confirma el pago, solo avisa que hay que estar atento y confirmarlo a mano en /admin cuando entre el dinero. */
+export function emailAvisoTransferenciaPendiente(
+  compra: TransferenciaPendienteParaEmail
+): { subject: string; html: string } {
+  const titulo = SERVICIO_TITULOS[compra.servicio] ?? compra.servicio;
+  const comprador =
+    [compra.compradorNombre, compra.compradorApellido].filter(Boolean).join(" ") || "—";
+  const monto = compra.monto != null ? `USD ${compra.monto.toLocaleString("en-US")}` : "A confirmar";
+
+  return {
+    subject: `Pedido #${compra.numero} — esperando transferencia — ${titulo}`,
+    html: ENVOLTORIO(`
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Transferencia pendiente</h2>
+      <p><strong>Pedido:</strong> #${compra.numero}</p>
+      <p><strong>Servicio:</strong> ${titulo}</p>
+      <p><strong>Monto:</strong> ${monto}</p>
+      <p><strong>Comprador/a:</strong> ${comprador}${compra.compradorEmail ? ` — ${compra.compradorEmail}` : ""}</p>
+      <p>${
+        compra.tieneComprobante
+          ? "Ya subió un comprobante — vas a poder verlo dentro del PDF del pedido."
+          : "Todavía no subió comprobante — puede que lo suba más tarde con el link de su pedido."
+      }</p>
+      <p style="margin-top:16px;">Este pedido queda como pendiente hasta que confirmes a mano que el dinero entró — desde el panel, tildá "Confirmar transferencia recibida" en su fila.</p>
+      <p style="margin-top:24px;">
+        <a href="${SITE_URL}/admin" class="link-tenue" style="color:#ccc;">Ver en el panel de administración →</a>
+      </p>
+    `),
+  };
+}
+
 /** Le llega a quien compró (regalo o no), agradeciendo y confirmando los próximos pasos. */
 export function emailGraciasComprador(compra: CompraParaEmail): { subject: string; html: string } {
   const producto = PRODUCTO_MENSAJES[compra.servicio];

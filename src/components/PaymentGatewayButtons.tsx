@@ -3,19 +3,20 @@
 import { useEffect, useState } from "react";
 import type { Moneda } from "@/lib/compras";
 
-const MP_CONFIGURED = !!process.env.NEXT_PUBLIC_MERCADOPAGO_PUBLIC_KEY;
-const STRIPE_CONFIGURED = !!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY;
+export type Pasarela = "mercadopago" | "paypal" | "transferencia";
 
 /**
- * Currency/gateway picker: ARS -> Mercado Pago, USD -> Stripe.
- * La moneda la decide sola la página según el país detectado por IP en
+ * Currency/gateway picker: ARS -> Mercado Pago (un solo botón "Pagar"), USD
+ * -> PayPal o transferencia bancaria (dos botones, el cliente elige). La
+ * moneda la decide sola la página según el país detectado por IP en
  * middleware.ts (guardado en la cookie "moneda") — no se muestra ningún
- * selector, cada visitante ve directo el botón que le corresponde.
+ * selector de moneda, cada visitante ve directo las opciones que le
+ * corresponden.
  */
 export default function PaymentGatewayButtons({
   onPagar,
 }: {
-  onPagar: (moneda: Moneda) => void;
+  onPagar: (moneda: Moneda, pasarela: Pasarela) => void;
 }) {
   const [moneda, setMoneda] = useState<Moneda | null>(null);
 
@@ -31,17 +32,24 @@ export default function PaymentGatewayButtons({
   // leer la cookie en el efecto de arriba.
   if (!moneda) return null;
 
-  return (
-    <div>
-      <button type="button" className="btn-primary" onClick={() => onPagar(moneda)}>
-        Pagar
-      </button>
+  if (moneda === "ARS") {
+    return (
+      <div>
+        <button type="button" className="btn-primary" onClick={() => onPagar("ARS", "mercadopago")}>
+          Pagar
+        </button>
+      </div>
+    );
+  }
 
-      {((moneda === "ARS" && !MP_CONFIGURED) || (moneda === "USD" && !STRIPE_CONFIGURED)) && (
-        <p style={{ fontSize: "0.75rem", color: "#666", marginTop: 10, fontFamily: "Inter, sans-serif" }}>
-          Pasarela en modo de prueba: falta configurar las credenciales reales.
-        </p>
-      )}
+  return (
+    <div style={{ display: "flex", gap: 12, flexWrap: "wrap" }}>
+      <button type="button" className="btn-primary" onClick={() => onPagar("USD", "paypal")}>
+        Pagar con PayPal
+      </button>
+      <button type="button" className="btn-outline" onClick={() => onPagar("USD", "transferencia")}>
+        Transferencia bancaria
+      </button>
     </div>
   );
 }

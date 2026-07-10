@@ -98,8 +98,16 @@ function Fila({ label, value }: { label: string; value: string }) {
 
 const LOGO_BUFFER = fs.readFileSync(path.join(process.cwd(), "public/logos/logo-completo-negro.png"));
 
+type ComprobanteImagen = { data: Buffer; format: "png" | "jpg" } | null;
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export default function PedidoPdfDocument({ pedido }: { pedido: any }) {
+export default function PedidoPdfDocument({
+  pedido,
+  comprobante,
+}: {
+  pedido: any;
+  comprobante?: ComprobanteImagen;
+}) {
   const datos = (pedido.datos ?? {}) as Record<string, unknown>;
   const camposDatos = Object.entries(datos).filter(([k]) => k !== "archivo");
 
@@ -162,6 +170,13 @@ export default function PedidoPdfDocument({ pedido }: { pedido: any }) {
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Cómo se enteró</Text>
             <Text>{pedido.como_supiste}</Text>
+          </View>
+        )}
+
+        {comprobante && (
+          <View style={styles.section} break>
+            <Text style={styles.sectionTitle}>Comprobante de transferencia</Text>
+            <Image src={comprobante} style={{ maxWidth: 400 }} />
           </View>
         )}
 

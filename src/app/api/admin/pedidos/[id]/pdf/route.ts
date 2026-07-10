@@ -25,7 +25,21 @@ export async function GET(
     return NextResponse.json({ error: "Pedido no encontrado" }, { status: 404 });
   }
 
-  const buffer = await renderToBuffer(PedidoPdfDocument({ pedido }));
+  let comprobante: { data: Buffer; format: "png" | "jpg" } | undefined;
+  if (pedido.comprobante_transferencia_url) {
+    const { data: archivo } = await supabaseAdmin.storage
+      .from("adjuntos")
+      .download(pedido.comprobante_transferencia_url);
+    if (archivo) {
+      const ext = pedido.comprobante_transferencia_url.split(".").pop()?.toLowerCase();
+      comprobante = {
+        data: Buffer.from(await archivo.arrayBuffer()),
+        format: ext === "jpg" || ext === "jpeg" ? "jpg" : "png",
+      };
+    }
+  }
+
+  const buffer = await renderToBuffer(PedidoPdfDocument({ pedido, comprobante }));
   const filename = nombreArchivoPedido(pedido);
 
   return new NextResponse(new Uint8Array(buffer), {
