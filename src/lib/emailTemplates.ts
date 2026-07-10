@@ -30,6 +30,12 @@ type CompraParaEmail = {
 // Ojo: muchos clientes de mail (sobre todo las apps de Gmail/Outlook en el
 // celular) ignoran @font-face y directamente muestran la tipografía de
 // respaldo (Georgia) — por eso el <style> Y el fallback inline importan acá.
+//
+// Regla dura: TODO <h2>/<p> lleva su propio color inline (nunca depender del
+// <style> de arriba ni de la herencia del <td> padre) — varias apps de mail
+// (Gmail incluido) borran el <style> del <head> y quedan solo los estilos
+// inline; sin color explícito, el texto cae al gris por default del cliente,
+// casi ilegible sobre la tarjeta oscura (bug real visto en producción).
 const ENVOLTORIO = (contenido: string) => `<!DOCTYPE html>
 <html>
   <head>
@@ -101,18 +107,18 @@ export function emailAvisoAdmin(compra: CompraParaEmail): { subject: string; htm
   return {
     subject: `Pedido #${compra.numero} pagado — ${titulo}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Nuevo pedido pagado</h2>
-      <p><strong>Pedido:</strong> #${compra.numero}</p>
-      <p><strong>Servicio:</strong> ${titulo}${compra.es_regalo ? " (regalo)" : ""}</p>
-      <p><strong>Monto:</strong> ${monto}</p>
-      <p><strong>Comprador/a:</strong> ${comprador}${compra.comprador_email ? ` — ${compra.comprador_email}` : ""}</p>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">Nuevo pedido pagado</h2>
+      <p style="color:#eee;"><strong>Pedido:</strong> #${compra.numero}</p>
+      <p style="color:#eee;"><strong>Servicio:</strong> ${titulo}${compra.es_regalo ? " (regalo)" : ""}</p>
+      <p style="color:#eee;"><strong>Monto:</strong> ${monto}</p>
+      <p style="color:#eee;"><strong>Comprador/a:</strong> ${comprador}${compra.comprador_email ? ` — ${compra.comprador_email}` : ""}</p>
       ${
         compra.es_regalo
-          ? `<p><strong>Destinatario/a:</strong> ${compra.destinatario_nombre ?? "—"} — ${compra.destinatario_email ?? "—"}</p>
-             <p>Ya le mandamos el link para completar su formulario.</p>`
-          : `<p>El formulario ya está completo, listo para trabajar.</p>`
+          ? `<p style="color:#eee;"><strong>Destinatario/a:</strong> ${compra.destinatario_nombre ?? "—"} — ${compra.destinatario_email ?? "—"}</p>
+             <p style="color:#eee;">Ya le mandamos el link para completar su formulario.</p>`
+          : `<p style="color:#eee;">El formulario ya está completo, listo para trabajar.</p>`
       }
-      <p style="margin-top:24px;">
+      <p style="margin-top:24px;color:#eee;">
         <a href="${SITE_URL}/admin" class="link-tenue" style="color:#ccc;">Ver en el panel de administración →</a>
       </p>
     `),
@@ -141,18 +147,18 @@ export function emailAvisoTransferenciaPendiente(
   return {
     subject: `Pedido #${compra.numero} — esperando transferencia — ${titulo}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Transferencia pendiente</h2>
-      <p><strong>Pedido:</strong> #${compra.numero}</p>
-      <p><strong>Servicio:</strong> ${titulo}</p>
-      <p><strong>Monto:</strong> ${monto}</p>
-      <p><strong>Comprador/a:</strong> ${comprador}${compra.compradorEmail ? ` — ${compra.compradorEmail}` : ""}</p>
-      <p>${
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">Transferencia pendiente</h2>
+      <p style="color:#eee;"><strong>Pedido:</strong> #${compra.numero}</p>
+      <p style="color:#eee;"><strong>Servicio:</strong> ${titulo}</p>
+      <p style="color:#eee;"><strong>Monto:</strong> ${monto}</p>
+      <p style="color:#eee;"><strong>Comprador/a:</strong> ${comprador}${compra.compradorEmail ? ` — ${compra.compradorEmail}` : ""}</p>
+      <p style="color:#eee;">${
         compra.tieneComprobante
           ? "Ya subió un comprobante — vas a poder verlo dentro del PDF del pedido."
           : "Todavía no subió comprobante — puede que lo suba más tarde con el link de su pedido."
       }</p>
-      <p style="margin-top:16px;">Este pedido queda como pendiente hasta que confirmes a mano que el dinero entró — desde el panel, tildá "Confirmar transferencia recibida" en su fila.</p>
-      <p style="margin-top:24px;">
+      <p style="margin-top:16px;color:#eee;">Este pedido queda como pendiente hasta que confirmes a mano que el dinero entró — desde el panel, tildá "Confirmar transferencia recibida" en su fila.</p>
+      <p style="margin-top:24px;color:#eee;">
         <a href="${SITE_URL}/admin" class="link-tenue" style="color:#ccc;">Ver en el panel de administración →</a>
       </p>
     `),
@@ -165,12 +171,12 @@ export function emailGraciasComprador(compra: CompraParaEmail): { subject: strin
   if (producto) {
     const parrafos = producto.cuerpo
       .split("\n\n")
-      .map((p) => `<p>${p}</p>`)
+      .map((p) => `<p style="color:#eee;">${p}</p>`)
       .join("\n");
     return {
       subject: producto.subtitulo,
       html: ENVOLTORIO(`
-        <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">${producto.subtitulo}</h2>
+        <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">${producto.subtitulo}</h2>
         ${parrafos}
       `),
     };
@@ -181,13 +187,13 @@ export function emailGraciasComprador(compra: CompraParaEmail): { subject: strin
   return {
     subject: `¡Gracias por tu ${compra.es_regalo ? "regalo" : "compra"}!`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">¡Gracias por tu confianza!</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">¡Gracias por tu confianza!</h2>
       ${
         compra.es_regalo
-          ? `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya le avisamos a
+          ? `<p style="color:#eee;">Recibimos tu pago de <strong>${titulo}</strong>. Ya le avisamos a
              ${compra.destinatario_nombre ?? "quien lo recibe"} por mail para que complete su
              formulario sin tener que pagar nada.</p>`
-          : `<p>Recibimos tu pago de <strong>${titulo}</strong>. Ya está todo listo de tu lado —
+          : `<p style="color:#eee;">Recibimos tu pago de <strong>${titulo}</strong>. Ya está todo listo de tu lado —
              me pongo en marcha y te contacto para los próximos pasos.</p>`
       }
       <p class="texto-tenue" style="margin-top:24px;font-family:'Pirata One',Georgia,serif;font-size:20px;color:#aaa;">Silencio, presencia y propósito.</p>
@@ -221,19 +227,19 @@ export function emailAvisoConsulta(consulta: ConsultaParaEmail): { subject: stri
   return {
     subject: `Nueva consulta${consulta.servicio ? ` — ${consulta.servicio}` : ""} de ${nombreCompleto}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Nueva consulta</h2>
-      <p><strong>De:</strong> ${nombreCompleto} — ${consulta.email}</p>
-      <p><strong>WhatsApp:</strong> ${consulta.whatsapp}</p>
-      ${consulta.servicio ? `<p><strong>Servicio:</strong> ${consulta.servicio}</p>` : ""}
-      ${ubicacion ? `<p><strong>Ubicación:</strong> ${ubicacion}</p>` : ""}
-      <p style="margin-top:16px;"><strong>Consulta:</strong></p>
-      <p style="white-space:pre-wrap;">${consulta.mensaje}</p>
-      <p style="text-align:center;margin:32px 0;">
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">Nueva consulta</h2>
+      <p style="color:#eee;"><strong>De:</strong> ${nombreCompleto} — ${consulta.email}</p>
+      <p style="color:#eee;"><strong>WhatsApp:</strong> ${consulta.whatsapp}</p>
+      ${consulta.servicio ? `<p style="color:#eee;"><strong>Servicio:</strong> ${consulta.servicio}</p>` : ""}
+      ${ubicacion ? `<p style="color:#eee;"><strong>Ubicación:</strong> ${ubicacion}</p>` : ""}
+      <p style="margin-top:16px;color:#eee;"><strong>Consulta:</strong></p>
+      <p style="white-space:pre-wrap;color:#eee;">${consulta.mensaje}</p>
+      <p style="text-align:center;margin:32px 0;color:#eee;">
         <a href="${mailtoReply}" class="boton-cta" style="background:linear-gradient(#fff,#fff);color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Responder por mail
         </a>
       </p>
-      <p style="margin-top:8px;">
+      <p style="margin-top:8px;color:#eee;">
         <a href="${SITE_URL}/admin" class="link-tenue" style="color:#ccc;">O responder desde el panel de administración →</a>
       </p>
     `),
@@ -245,10 +251,10 @@ export function emailRespuestaConsulta(mensajeOriginal: string, respuesta: strin
   return {
     subject: "Respuesta a tu consulta — Monje Urbano Libre",
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Tu consulta</h2>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">Tu consulta</h2>
       <p class="texto-tenue" style="color:#999;white-space:pre-wrap;border-left:2px solid #444;padding-left:14px;">${mensajeOriginal}</p>
-      <h2 style="margin:24px 0 12px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Respuesta</h2>
-      <p style="white-space:pre-wrap;">${respuesta}</p>
+      <h2 style="margin:24px 0 12px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">Respuesta</h2>
+      <p style="white-space:pre-wrap;color:#eee;">${respuesta}</p>
     `),
   };
 }
@@ -262,12 +268,12 @@ export function emailLinkRegalo(compra: CompraParaEmail): { subject: string; htm
   return {
     subject: `Te regalaron ${titulo}`,
     html: ENVOLTORIO(`
-      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;">Te regalaron ${titulo}</h2>
-      <p>
+      <h2 style="margin:0 0 20px;font-family:'Pirata One',Georgia,serif;font-size:32px;font-weight:normal;color:#fff;">Te regalaron ${titulo}</h2>
+      <p style="color:#eee;">
         ${regalador ? `${regalador} pensó en vos.` : "Alguien pensó en vos."}
         Ya está todo pago — solo falta que completes tu historia para que empecemos.
       </p>
-      <p style="text-align:center;margin:32px 0;">
+      <p style="text-align:center;margin:32px 0;color:#eee;">
         <a href="${link}" class="boton-cta" style="background:linear-gradient(#fff,#fff);color:#111;padding:14px 28px;border-radius:4px;text-decoration:none;display:inline-block;">
           Completar mi formulario
         </a>
