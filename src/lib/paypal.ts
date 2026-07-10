@@ -16,8 +16,15 @@ async function obtenerToken(): Promise<string> {
     },
     body: "grant_type=client_credentials",
   });
-  const data = await res.json().catch(() => null);
+  const raw = await res.text();
+  let data: { access_token?: string } | null = null;
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    data = null;
+  }
   if (!res.ok || !data?.access_token) {
+    console.error(`PayPal OAuth token falló (status ${res.status}):`, raw);
     throw new Error("No se pudo obtener el token de acceso de PayPal");
   }
   return data.access_token as string;
