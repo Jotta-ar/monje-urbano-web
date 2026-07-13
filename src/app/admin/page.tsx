@@ -7,6 +7,7 @@ import AdminGate from "@/components/admin/AdminGate";
 import { nombreArchivoPedido } from "@/lib/pedidoFilename";
 import MetricasPanel from "@/components/admin/growth/MetricasPanel";
 import RecomendacionesPanel from "@/components/admin/growth/RecomendacionesPanel";
+import ContactosPanel from "@/components/admin/growth/ContactosPanel";
 
 interface PrecioRow {
   id: string;
@@ -55,10 +56,18 @@ export default function AdminPage() {
 
 function AdminTabs({ session }: { session: Session }) {
   const [tab, setTab] = useState<
-    "metricas" | "recomendaciones" | "precios" | "pedidos" | "regalar" | "pago-prueba" | "consultas" | "transferencia"
+    | "metricas"
+    | "recomendaciones"
+    | "contactos"
+    | "precios"
+    | "pedidos"
+    | "regalar"
+    | "pago-prueba"
+    | "consultas"
+    | "transferencia"
   >("metricas");
 
-  const esPanelDeCrecimiento = tab === "metricas" || tab === "recomendaciones";
+  const esPanelDeCrecimiento = tab === "metricas" || tab === "recomendaciones" || tab === "contactos";
 
   return (
     <div className="form-plain" style={{ maxWidth: esPanelDeCrecimiento ? 1440 : 1000 }}>
@@ -78,6 +87,14 @@ function AdminTabs({ session }: { session: Session }) {
           onClick={() => setTab("recomendaciones")}
         >
           Recomendaciones
+        </button>
+        <button
+          type="button"
+          className={tab === "contactos" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("contactos")}
+        >
+          Contactos
         </button>
         <button
           type="button"
@@ -131,6 +148,7 @@ function AdminTabs({ session }: { session: Session }) {
 
       {tab === "metricas" && <MetricasPanel session={session} onIrARecomendaciones={() => setTab("recomendaciones")} />}
       {tab === "recomendaciones" && <RecomendacionesPanel session={session} />}
+      {tab === "contactos" && <ContactosPanel session={session} />}
       {tab === "pedidos" && <PedidosPanel session={session} />}
       {tab === "regalar" && <RegalarPanel session={session} />}
       {tab === "precios" && <PreciosPanel />}

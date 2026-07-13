@@ -1241,6 +1241,55 @@ fieldset {
   color: var(--muted-2);
 }
 
+.chip-etapa[data-etapa="lead"] { border: 1px solid var(--border); color: var(--muted); }
+.chip-etapa[data-etapa="consulto"] { background: rgba(209, 165, 63, 0.15); color: var(--warn); }
+.chip-etapa[data-etapa="comprador"] { background: rgba(95, 174, 130, 0.15); color: var(--ok); }
+.chip-etapa[data-etapa="recurrente"] { background: rgba(242, 214, 117, 0.18); color: var(--moon-yellow); }
+
+/* ---- Contactos ---- */
+
+.contactos-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+
+.contactos-table {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 720px;
+  font-size: 0.95rem;
+}
+
+.contactos-table thead th {
+  text-align: left;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.contactos-table tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.contactos-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.contactos-table tbody tr:hover td {
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.contactos-table td.num {
+  font-variant-numeric: tabular-nums;
+}
+
 .reco-btn {
   font-size: 0.88rem;
   padding: 6px 13px;
