@@ -3,6 +3,10 @@
     {
       "path": "/api/cron/youtube-metricas",
       "schedule": "0 12 * * 1"
+    },
+    {
+      "path": "/api/cron/tiktok-metricas",
+      "schedule": "30 12 * * 1"
     }
   ]
 }

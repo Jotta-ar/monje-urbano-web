@@ -17,7 +17,11 @@ import { supabaseAdmin } from "@/lib/supabase-admin";
 export async function requireAdmin(req: NextRequest): Promise<string | null> {
   if (!supabaseAdmin) return null;
   const auth = req.headers.get("authorization") ?? "";
-  const token = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  const tokenDeHeader = auth.startsWith("Bearer ") ? auth.slice(7) : null;
+  // Fallback a ?token= para rutas que un <a href> navega directo (ej. el
+  // "Conectar TikTok" que redirige a un OAuth externo) — un link de
+  // navegador no puede mandar el header Authorization como sí hace fetch().
+  const token = tokenDeHeader ?? req.nextUrl.searchParams.get("token");
   if (!token) return null;
 
   const adminEmail = process.env.ADMIN_EMAIL?.trim().toLowerCase();

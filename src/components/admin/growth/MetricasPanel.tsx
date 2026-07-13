@@ -76,7 +76,20 @@ export default function MetricasPanel({
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [redes, setRedes] = useState<Redes | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [avisoTikTok, setAvisoTikTok] = useState<"conectado" | "error" | null>(null);
   const token = session.access_token;
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const resultado = params.get("tiktok");
+    if (resultado === "conectado" || resultado === "error") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setAvisoTikTok(resultado);
+      params.delete("tiktok");
+      const query = params.toString();
+      window.history.replaceState({}, "", window.location.pathname + (query ? `?${query}` : ""));
+    }
+  }, []);
 
   useEffect(() => {
     async function cargar() {
@@ -101,6 +114,8 @@ export default function MetricasPanel({
 
   const youtube = redes.historico.youtube ?? [];
   const ultimoYoutube = youtube[youtube.length - 1];
+  const tiktok = redes.historico.tiktok ?? [];
+  const ultimoTikTok = tiktok[tiktok.length - 1];
 
   return (
     <div>
@@ -108,6 +123,15 @@ export default function MetricasPanel({
         <h1>Métricas</h1>
         <p>Ventas, pedidos y redes — actualizado en cada visita al panel.</p>
       </div>
+
+      {avisoTikTok === "conectado" && (
+        <p style={{ color: "var(--ok)", fontSize: "0.9rem", marginBottom: 20 }}>TikTok conectado correctamente ✓</p>
+      )}
+      {avisoTikTok === "error" && (
+        <p style={{ color: "var(--danger)", fontSize: "0.9rem", marginBottom: 20 }}>
+          No se pudo conectar TikTok, probá de nuevo.
+        </p>
+      )}
 
       <h3 style={{ fontSize: "1rem", color: "#ccc", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 14px" }}>
         Ventas
@@ -180,10 +204,22 @@ export default function MetricasPanel({
           <p className="stat-value" style={{ fontSize: "1.1rem" }}>Sin conectar</p>
           <p className="stat-sub">Ver recomendación →</p>
         </div>
-        <div className="stat-tile is-muted is-link" onClick={onIrARecomendaciones} role="button" tabIndex={0}>
+        <div className={`stat-tile${ultimoTikTok ? "" : " is-muted"}`}>
           <p className="stat-label">TikTok</p>
-          <p className="stat-value" style={{ fontSize: "1.1rem" }}>Sin conectar</p>
-          <p className="stat-sub">Ver recomendación →</p>
+          {ultimoTikTok ? (
+            <>
+              <p className="stat-value">{ultimoTikTok.seguidores}</p>
+              <p className="stat-sub">{ultimoTikTok.publicaciones} videos</p>
+              <Sparkline valores={tiktok.map((p) => p.seguidores ?? 0)} />
+            </>
+          ) : (
+            <>
+              <p className="stat-value" style={{ fontSize: "1.1rem" }}>Sin conectar</p>
+              <a href={`/api/admin/redes/tiktok/conectar?token=${token}`} className="stat-sub" style={{ textDecoration: "underline" }}>
+                Conectar TikTok →
+              </a>
+            </>
+          )}
         </div>
       </div>
     </div>
