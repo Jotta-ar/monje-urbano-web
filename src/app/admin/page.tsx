@@ -58,8 +58,10 @@ function AdminTabs({ session }: { session: Session }) {
     "metricas" | "recomendaciones" | "precios" | "pedidos" | "regalar" | "pago-prueba" | "consultas" | "transferencia"
   >("metricas");
 
+  const esPanelDeCrecimiento = tab === "metricas" || tab === "recomendaciones";
+
   return (
-    <div className="form-plain" style={{ maxWidth: 1000 }}>
+    <div className="form-plain" style={{ maxWidth: esPanelDeCrecimiento ? 1440 : 1000 }}>
       <div style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}>
         <button
           type="button"

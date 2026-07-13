@@ -109,7 +109,7 @@ export default function MetricasPanel({
         <p>Ventas, pedidos y redes — actualizado en cada visita al panel.</p>
       </div>
 
-      <h3 style={{ fontSize: "0.85rem", color: "#ccc", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 12px" }}>
+      <h3 style={{ fontSize: "1rem", color: "#ccc", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 14px" }}>
         Ventas
       </h3>
       <div className="stat-grid" style={{ marginBottom: 32 }}>
@@ -159,7 +159,7 @@ export default function MetricasPanel({
         </div>
       </div>
 
-      <h3 style={{ fontSize: "0.85rem", color: "#ccc", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 12px" }}>
+      <h3 style={{ fontSize: "1rem", color: "#ccc", textTransform: "uppercase", letterSpacing: "0.05em", margin: "0 0 14px" }}>
         Redes
       </h3>
       <div className="stat-grid">
