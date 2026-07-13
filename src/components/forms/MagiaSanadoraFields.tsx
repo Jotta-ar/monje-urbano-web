@@ -1,3 +1,6 @@
+const ANTIGUEDADES = ["Menos de 1 mes", "1–6 meses", "6–12 meses", "Más de 1 año"];
+const FRECUENCIAS = ["Esporádico", "Semanal", "Diario"];
+
 export default function MagiaSanadoraFields() {
   return (
     <>
@@ -20,24 +23,27 @@ export default function MagiaSanadoraFields() {
         </div>
         <div className="form-group">
           <label className="required">Antigüedad</label>
-          <select name="antiguedad" required defaultValue="">
-            <option value="" disabled>Elegí una opción</option>
-            <option>Menos de 1 mes</option>
-            <option>1–6 meses</option>
-            <option>6–12 meses</option>
-            <option>Más de 1 año</option>
-          </select>
+          <div className="radio-group">
+            {ANTIGUEDADES.map((a) => (
+              <label key={a}>
+                <input type="radio" name="antiguedad" value={a} required />
+                <span>{a}</span>
+              </label>
+            ))}
+          </div>
         </div>
       </div>
 
       <div className="form-group">
         <label className="required">Frecuencia</label>
-        <select name="frecuencia" required defaultValue="">
-          <option value="" disabled>Elegí una opción</option>
-          <option>Esporádico</option>
-          <option>Semanal</option>
-          <option>Diario</option>
-        </select>
+        <div className="radio-group">
+          {FRECUENCIAS.map((f) => (
+            <label key={f}>
+              <input type="radio" name="frecuencia" value={f} required />
+              <span>{f}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="form-group">

@@ -3,6 +3,7 @@
 import { useState } from "react";
 
 const STORAGE_KEY = "mul_datos_personales";
+const GENEROS = ["Femenino", "Masculino", "Otro"];
 
 type Datos = {
   nombre: string;
@@ -152,17 +153,21 @@ export default function PersonalDataFields() {
         </div>
         <div className="form-group">
           <label className="required">Género</label>
-          <select
-            name="genero"
-            required
-            value={datos.genero}
-            onChange={(e) => actualizar("genero", e.target.value)}
-          >
-            <option value="" disabled>Elegí una opción</option>
-            <option>Femenino</option>
-            <option>Masculino</option>
-            <option>Otro</option>
-          </select>
+          <div className="radio-group">
+            {GENEROS.map((g) => (
+              <label key={g}>
+                <input
+                  type="radio"
+                  name="genero"
+                  value={g}
+                  required
+                  checked={datos.genero === g}
+                  onChange={(e) => actualizar("genero", e.target.value)}
+                />
+                <span>{g}</span>
+              </label>
+            ))}
+          </div>
         </div>
       </div>
     </>

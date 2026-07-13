@@ -1,3 +1,19 @@
+const DURACIONES = [
+  "Menos de 5 minutos",
+  "Entre 5 y 10 minutos",
+  "Entre 10 y 15 minutos",
+  "Más de 15 minutos",
+  "No lo sé aún / prefiero que fluya",
+];
+const TONOS_RITUAL = [
+  "Inspirador y motivador",
+  "Suave y contemplativo",
+  "Directo y estructurado",
+  "Poético y profundo",
+  "Neutro y claro",
+  "Otro",
+];
+
 export default function RitualMatutinoFields() {
   return (
     <>
@@ -23,27 +39,26 @@ export default function RitualMatutinoFields() {
 
       <div className="form-group">
         <label className="required">¿Cuánto tiempo querés que dure tu ritual matutino?</label>
-        <select name="duracion" required defaultValue="">
-          <option value="" disabled>Elegí una opción</option>
-          <option>Menos de 5 minutos</option>
-          <option>Entre 5 y 10 minutos</option>
-          <option>Entre 10 y 15 minutos</option>
-          <option>Más de 15 minutos</option>
-          <option>No lo sé aún / prefiero que fluya</option>
-        </select>
+        <div className="radio-group">
+          {DURACIONES.map((d) => (
+            <label key={d}>
+              <input type="radio" name="duracion" value={d} required />
+              <span>{d}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="form-group">
         <label className="required">¿Qué tipo de lenguaje o tono preferís?</label>
-        <select name="tono" required defaultValue="">
-          <option value="" disabled>Elegí una opción</option>
-          <option>Inspirador y motivador</option>
-          <option>Suave y contemplativo</option>
-          <option>Directo y estructurado</option>
-          <option>Poético y profundo</option>
-          <option>Neutro y claro</option>
-          <option>Otro</option>
-        </select>
+        <div className="radio-group">
+          {TONOS_RITUAL.map((t) => (
+            <label key={t}>
+              <input type="radio" name="tono" value={t} required />
+              <span>{t}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="form-group">

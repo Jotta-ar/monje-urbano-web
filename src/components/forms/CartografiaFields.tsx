@@ -1,4 +1,5 @@
 const EMOCIONES = ["Ansiedad", "Tristeza", "Enojo", "Miedo", "Culpa", "Vergüenza", "Otra"];
+const LADOS = ["Derecho", "Izquierdo", "Central", "Alterna", "No lo sé"];
 
 export default function CartografiaFields() {
   return (
@@ -17,14 +18,14 @@ export default function CartografiaFields() {
 
       <div className="form-group">
         <label className="required">¿Es en lado derecho, izquierdo o central?</label>
-        <select name="lado" required defaultValue="">
-          <option value="" disabled>Elegí una opción</option>
-          <option>Derecho</option>
-          <option>Izquierdo</option>
-          <option>Central</option>
-          <option>Alterna</option>
-          <option>No lo sé</option>
-        </select>
+        <div className="radio-group">
+          {LADOS.map((l) => (
+            <label key={l}>
+              <input type="radio" name="lado" value={l} required />
+              <span>{l}</span>
+            </label>
+          ))}
+        </div>
       </div>
 
       <div className="form-group">

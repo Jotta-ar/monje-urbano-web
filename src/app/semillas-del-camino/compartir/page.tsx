@@ -16,6 +16,14 @@ const SERVICIOS = [
   "Otro",
 ];
 
+const VALORACION_OPTS = [
+  { value: "5", label: "★★★★★" },
+  { value: "4", label: "★★★★☆" },
+  { value: "3", label: "★★★☆☆" },
+  { value: "2", label: "★★☆☆☆" },
+  { value: "1", label: "★☆☆☆☆" },
+];
+
 const PRIVACIDAD_OPTS = [
   { value: "nombre_completo", label: "Sí, con mi nombre y apellido." },
   { value: "solo_nombre", label: "Sí, solo con mi nombre." },
@@ -172,14 +180,14 @@ export default function CompartirExperienciaPage() {
 
           <div className="form-group">
             <label className="required">¿Cómo fue tu experiencia?</label>
-            <select name="valoracion" required defaultValue="">
-              <option value="" disabled>Elegí una valoración</option>
-              <option value="5">★★★★★</option>
-              <option value="4">★★★★☆</option>
-              <option value="3">★★★☆☆</option>
-              <option value="2">★★☆☆☆</option>
-              <option value="1">★☆☆☆☆</option>
-            </select>
+            <div className="radio-group">
+              {VALORACION_OPTS.map((opt) => (
+                <label key={opt.value}>
+                  <input type="radio" name="valoracion" value={opt.value} required />
+                  <span>{opt.label}</span>
+                </label>
+              ))}
+            </div>
           </div>
 
           <div className="form-group">

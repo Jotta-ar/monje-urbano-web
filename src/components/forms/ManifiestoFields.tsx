@@ -1,4 +1,5 @@
 const TONOS = ["Breve", "Poético", "Claro", "Inspirador", "Contundente", "Introspectivo", "Otro"];
+const ALMA_NECESITA = ["Paz", "Dirección", "Fuerza", "Fe", "Calma", "Claridad", "Libertad", "Soltar", "Otro"];
 
 export default function ManifiestoFields() {
   return (
@@ -16,18 +17,19 @@ export default function ManifiestoFields() {
 
       <div className="form-group">
         <label className="required">¿Qué sentís que más necesita tu alma?</label>
-        <select name="alma_necesita" required defaultValue="">
-          <option value="" disabled>Elegí una opción</option>
-          <option>Paz</option>
-          <option>Dirección</option>
-          <option>Fuerza</option>
-          <option>Fe</option>
-          <option>Calma</option>
-          <option>Claridad</option>
-          <option>Libertad</option>
-          <option>Soltar</option>
-          <option>Otro</option>
-        </select>
+        <div className="radio-group">
+          {ALMA_NECESITA.map((a) => (
+            <label key={a}>
+              <input type="radio" name="alma_necesita" value={a} required />
+              <span>{a}</span>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      <div className="form-group">
+        <label>Nombre a mostrar en el manifiesto (opcional, si preferís iniciales o alias)</label>
+        <input type="text" name="nombre_manifiesto" />
       </div>
 
       <div className="form-group">
