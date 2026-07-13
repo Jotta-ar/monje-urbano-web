@@ -7,6 +7,12 @@
   --muted-2: #666;
   --border: rgba(255, 255, 255, 0.08);
   --moon-yellow: #f2d675;
+
+  /* Panel de Crecimiento (/admin) — estados semánticos, se suman a la
+     paleta de arriba en vez de traer una identidad nueva. */
+  --ok: #5fae82;
+  --warn: #d1a53f;
+  --danger: #c0605a;
 }
 
 @theme inline {
@@ -1073,5 +1079,184 @@ fieldset {
 
   .sacred-watermark img {
     width: 78vw;
+  }
+}
+
+/* ---------- Panel de Crecimiento (/admin, tabs "Métricas" y "Recomendaciones") ---------- */
+
+.stat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 14px;
+}
+
+.stat-tile {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.stat-tile.is-muted {
+  opacity: 0.55;
+}
+
+.stat-tile.is-link:hover {
+  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(255, 255, 255, 0.04);
+  cursor: pointer;
+}
+
+.stat-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+
+.stat-value {
+  font-size: 1.85rem;
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg);
+  margin: 0;
+  line-height: 1.15;
+}
+
+.stat-sub {
+  font-size: 0.78rem;
+  color: var(--muted);
+  margin: 4px 0 0;
+}
+
+.stat-delta {
+  font-size: 0.78rem;
+  font-variant-numeric: tabular-nums;
+}
+.stat-delta.up { color: var(--ok); }
+.stat-delta.down { color: var(--danger); }
+
+.sparkline {
+  display: block;
+  width: 100%;
+  height: 32px;
+  margin-top: 10px;
+}
+
+/* ---- Recomendaciones ---- */
+
+.reco-board {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  align-items: start;
+}
+
+.reco-column-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--muted);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid var(--border);
+}
+
+.reco-column-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.reco-card {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.reco-card-top {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.reco-card h4 {
+  margin: 0;
+  font-size: 0.92rem;
+  color: var(--fg);
+  font-weight: 600;
+}
+
+.reco-card p {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--muted);
+}
+
+.reco-card-actions {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  font-size: 0.64rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 4px;
+  line-height: 1.5;
+}
+
+.chip-area {
+  font-family: ui-monospace, "SF Mono", Consolas, monospace;
+  font-weight: 700;
+}
+.chip-area.familia-captacion { background: rgba(201, 123, 107, 0.15); color: #d99584; }
+.chip-area.familia-conversion { background: rgba(242, 214, 117, 0.15); color: var(--moon-yellow); }
+.chip-area.familia-relacion { background: rgba(111, 168, 201, 0.15); color: #8fc0e0; }
+.chip-area.familia-base { background: rgba(155, 142, 196, 0.15); color: #b3a4dd; }
+
+.chip-prioridad[data-prioridad="alta"] { background: rgba(192, 96, 90, 0.15); color: var(--danger); }
+.chip-prioridad[data-prioridad="media"] { background: rgba(209, 165, 63, 0.15); color: var(--warn); }
+.chip-prioridad[data-prioridad="baja"] { background: rgba(153, 153, 153, 0.15); color: var(--muted); }
+
+.chip-origen {
+  border: 1px solid var(--border);
+  color: var(--muted-2);
+}
+
+.reco-btn {
+  font-size: 0.72rem;
+  padding: 4px 10px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.reco-btn:hover { border-color: rgba(255, 255, 255, 0.3); color: var(--fg); }
+.reco-btn:focus-visible {
+  outline: 2px solid var(--moon-yellow);
+  outline-offset: 1px;
+}
+
+@media (max-width: 768px) {
+  .reco-board {
+    grid-template-columns: 1fr;
   }
 }

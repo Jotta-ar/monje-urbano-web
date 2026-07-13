@@ -1,0 +1,8 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/youtube-metricas",
+      "schedule": "0 12 * * 1"
+    }
+  ]
+}

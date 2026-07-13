@@ -5,6 +5,8 @@ import type { Session } from "@supabase/supabase-js";
 import { supabase } from "@/lib/supabase";
 import AdminGate from "@/components/admin/AdminGate";
 import { nombreArchivoPedido } from "@/lib/pedidoFilename";
+import MetricasPanel from "@/components/admin/growth/MetricasPanel";
+import RecomendacionesPanel from "@/components/admin/growth/RecomendacionesPanel";
 
 interface PrecioRow {
   id: string;
@@ -53,12 +55,28 @@ export default function AdminPage() {
 
 function AdminTabs({ session }: { session: Session }) {
   const [tab, setTab] = useState<
-    "precios" | "pedidos" | "regalar" | "pago-prueba" | "consultas" | "transferencia"
-  >("pedidos");
+    "metricas" | "recomendaciones" | "precios" | "pedidos" | "regalar" | "pago-prueba" | "consultas" | "transferencia"
+  >("metricas");
 
   return (
     <div className="form-plain" style={{ maxWidth: 1000 }}>
       <div style={{ display: "flex", gap: 10, marginBottom: 28, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className={tab === "metricas" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("metricas")}
+        >
+          Métricas
+        </button>
+        <button
+          type="button"
+          className={tab === "recomendaciones" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("recomendaciones")}
+        >
+          Recomendaciones
+        </button>
         <button
           type="button"
           className={tab === "pedidos" ? "btn-primary" : "btn-secondary"}
@@ -109,6 +127,8 @@ function AdminTabs({ session }: { session: Session }) {
         </button>
       </div>
 
+      {tab === "metricas" && <MetricasPanel session={session} onIrARecomendaciones={() => setTab("recomendaciones")} />}
+      {tab === "recomendaciones" && <RecomendacionesPanel session={session} />}
       {tab === "pedidos" && <PedidosPanel session={session} />}
       {tab === "regalar" && <RegalarPanel session={session} />}
       {tab === "precios" && <PreciosPanel />}
