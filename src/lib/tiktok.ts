@@ -162,3 +162,29 @@ export async function obtenerEstadisticasTikTok(): Promise<EstadisticasTikTok | 
     videos: Number(stats.video_count ?? 0),
   };
 }
+
+/**
+ * Trae las estadísticas y las guarda como snapshot en redes_metricas — lo
+ * usan tanto el cron semanal como el callback de conexión (para que el tile
+ * de TikTok muestre datos reales al toque, en vez de esperar al lunes).
+ */
+export async function registrarSnapshotTikTok(): Promise<EstadisticasTikTok | null> {
+  if (!supabaseAdmin) return null;
+
+  const stats = await obtenerEstadisticasTikTok();
+  if (!stats) return null;
+
+  const { error } = await supabaseAdmin.from("redes_metricas").insert({
+    plataforma: "tiktok",
+    seguidores: stats.seguidores,
+    publicaciones: stats.videos,
+    metrica_extra: { siguiendo: stats.siguiendo, likes: stats.likes },
+  });
+
+  if (error) {
+    console.error("No se pudo guardar la métrica de TikTok:", error);
+    return null;
+  }
+
+  return stats;
+}

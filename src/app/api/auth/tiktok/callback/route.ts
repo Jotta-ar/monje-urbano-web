@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { intercambiarCodigoPorToken } from "@/lib/tiktok";
+import { intercambiarCodigoPorToken, registrarSnapshotTikTok } from "@/lib/tiktok";
 
 /**
  * TikTok redirige acá con ?code&state después de que Jose autoriza la app.
@@ -23,6 +23,11 @@ export async function GET(req: NextRequest) {
   }
 
   const ok = await intercambiarCodigoPorToken(code);
+  if (ok) {
+    // Best-effort: si esto falla, el cron semanal lo va a completar de
+    // todos modos — no vale la pena mostrar error de conexión por esto.
+    await registrarSnapshotTikTok();
+  }
   destino.searchParams.set("tiktok", ok ? "conectado" : "error");
 
   const res = NextResponse.redirect(destino);
