@@ -15,16 +15,27 @@ export async function PATCH(
 
   const { id } = await params;
   const body = await req.json().catch(() => null);
-  const estado = body?.estado;
 
-  if (!ESTADOS.includes(estado)) {
-    return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
+  const cambios: Record<string, unknown> = {};
+
+  if (body?.estado !== undefined) {
+    if (!ESTADOS.includes(body.estado)) {
+      return NextResponse.json({ error: "Estado inválido" }, { status: 400 });
+    }
+    cambios.estado = body.estado;
   }
 
-  const { error } = await supabaseAdmin
-    .from("recomendaciones")
-    .update({ estado, actualizado_en: new Date().toISOString() })
-    .eq("id", id);
+  if (body?.notas !== undefined) {
+    cambios.notas = typeof body.notas === "string" ? body.notas.trim() || null : null;
+  }
+
+  if (Object.keys(cambios).length === 0) {
+    return NextResponse.json({ error: "Nada para actualizar" }, { status: 400 });
+  }
+
+  cambios.actualizado_en = new Date().toISOString();
+
+  const { error } = await supabaseAdmin.from("recomendaciones").update(cambios).eq("id", id);
 
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });

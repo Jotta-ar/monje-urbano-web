@@ -16,6 +16,7 @@ interface Recomendacion {
   prioridad: Prioridad;
   estado: Estado;
   origen: Origen;
+  notas: string | null;
   creado_en: string;
 }
 
@@ -63,14 +64,62 @@ function DescripcionCard({ texto }: { texto: string }) {
   );
 }
 
+function NotaCard({ r, onGuardarNota }: { r: Recomendacion; onGuardarNota: (id: string, notas: string) => void }) {
+  const [editando, setEditando] = useState(false);
+  const [borrador, setBorrador] = useState(r.notas ?? "");
+
+  if (editando) {
+    return (
+      <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+        <textarea
+          rows={3}
+          value={borrador}
+          onChange={(e) => setBorrador(e.target.value)}
+          placeholder="Tu anotación sobre esta recomendación…"
+          style={{ fontSize: "0.9rem" }}
+          autoFocus
+        />
+        <div style={{ display: "flex", gap: 6 }}>
+          <button
+            type="button"
+            className="reco-btn"
+            onClick={() => {
+              onGuardarNota(r.id, borrador.trim());
+              setEditando(false);
+            }}
+          >
+            Guardar nota
+          </button>
+          <button type="button" className="reco-btn" onClick={() => { setBorrador(r.notas ?? ""); setEditando(false); }}>
+            Cancelar
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <>
+      {r.notas && (
+        <p style={{ fontStyle: "italic", borderLeft: "2px solid var(--border)", paddingLeft: 10 }}>{r.notas}</p>
+      )}
+      <button type="button" className="reco-btn" onClick={() => setEditando(true)} style={{ alignSelf: "flex-start" }}>
+        {r.notas ? "Editar nota" : "Nota"}
+      </button>
+    </>
+  );
+}
+
 function RecoCard({
   r,
   colapsable,
   onCambiarEstado,
+  onGuardarNota,
 }: {
   r: Recomendacion;
   colapsable: boolean;
   onCambiarEstado: (id: string, nuevoEstado: Estado) => void;
+  onGuardarNota: (id: string, notas: string) => void;
 }) {
   const [expandido, setExpandido] = useState(!colapsable);
 
@@ -96,6 +145,7 @@ function RecoCard({
       {expandido && (
         <>
           {r.descripcion && <DescripcionCard texto={r.descripcion} />}
+          <NotaCard r={r} onGuardarNota={onGuardarNota} />
           <div className="reco-card-actions">
             {accionesPara(r.estado).map((accion) => (
               <button
@@ -171,6 +221,20 @@ export default function RecomendacionesPanel({ session }: { session: Session }) 
     }
   }
 
+  async function guardarNota(id: string, notas: string) {
+    const valor = notas || null;
+    setRecos((prev) => prev?.map((r) => (r.id === id ? { ...r, notas: valor } : r)) ?? null);
+    const res = await fetch(`/api/admin/recomendaciones/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ notas: valor }),
+    });
+    if (!res.ok) {
+      setError("No se pudo guardar la nota, probá de nuevo.");
+      cargar();
+    }
+  }
+
   if (error && !recos) return <p style={{ color: "#ff6666", fontSize: "0.85rem" }}>{error}</p>;
   if (!recos) return <p style={{ color: "#888" }}>Cargando…</p>;
 
@@ -216,6 +280,7 @@ export default function RecomendacionesPanel({ session }: { session: Session }) 
                     r={r}
                     colapsable={col.estado === "hecho" || col.estado === "descartada"}
                     onCambiarEstado={cambiarEstado}
+                    onGuardarNota={guardarNota}
                   />
                 ))}
               </div>

@@ -8,6 +8,7 @@ import { nombreArchivoPedido } from "@/lib/pedidoFilename";
 import MetricasPanel from "@/components/admin/growth/MetricasPanel";
 import RecomendacionesPanel from "@/components/admin/growth/RecomendacionesPanel";
 import ContactosPanel from "@/components/admin/growth/ContactosPanel";
+import ReportesPanel from "@/components/admin/growth/ReportesPanel";
 
 interface PrecioRow {
   id: string;
@@ -58,6 +59,7 @@ function AdminTabs({ session }: { session: Session }) {
   const [tab, setTab] = useState<
     | "metricas"
     | "recomendaciones"
+    | "reportes"
     | "contactos"
     | "precios"
     | "pedidos"
@@ -67,7 +69,8 @@ function AdminTabs({ session }: { session: Session }) {
     | "transferencia"
   >("metricas");
 
-  const esPanelDeCrecimiento = tab === "metricas" || tab === "recomendaciones" || tab === "contactos";
+  const esPanelDeCrecimiento =
+    tab === "metricas" || tab === "recomendaciones" || tab === "reportes" || tab === "contactos";
 
   return (
     <div className="form-plain" style={{ maxWidth: esPanelDeCrecimiento ? 1440 : 1000 }}>
@@ -87,6 +90,14 @@ function AdminTabs({ session }: { session: Session }) {
           onClick={() => setTab("recomendaciones")}
         >
           Recomendaciones
+        </button>
+        <button
+          type="button"
+          className={tab === "reportes" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("reportes")}
+        >
+          Reportes
         </button>
         <button
           type="button"
@@ -148,6 +159,7 @@ function AdminTabs({ session }: { session: Session }) {
 
       {tab === "metricas" && <MetricasPanel session={session} />}
       {tab === "recomendaciones" && <RecomendacionesPanel session={session} />}
+      {tab === "reportes" && <ReportesPanel session={session} />}
       {tab === "contactos" && <ContactosPanel session={session} />}
       {tab === "pedidos" && <PedidosPanel session={session} />}
       {tab === "regalar" && <RegalarPanel session={session} />}
