@@ -63,6 +63,57 @@ function DescripcionCard({ texto }: { texto: string }) {
   );
 }
 
+function RecoCard({
+  r,
+  colapsable,
+  onCambiarEstado,
+}: {
+  r: Recomendacion;
+  colapsable: boolean;
+  onCambiarEstado: (id: string, nuevoEstado: Estado) => void;
+}) {
+  const [expandido, setExpandido] = useState(!colapsable);
+
+  return (
+    <div className="reco-card">
+      <div className="reco-card-top">
+        <span className={`chip chip-area familia-${FAMILIA[r.area]}`}>{r.area}</span>
+        <span className="chip chip-prioridad" data-prioridad={r.prioridad}>{r.prioridad}</span>
+        <span className="chip chip-origen">{ORIGEN_LABEL[r.origen]}</span>
+        {colapsable && (
+          <button
+            type="button"
+            className="reco-btn ver-mas"
+            style={{ marginLeft: "auto" }}
+            onClick={() => setExpandido((v) => !v)}
+            aria-label={expandido ? "Colapsar" : "Expandir"}
+          >
+            {expandido ? "▲" : "▼"}
+          </button>
+        )}
+      </div>
+      <h4>{r.titulo}</h4>
+      {expandido && (
+        <>
+          {r.descripcion && <DescripcionCard texto={r.descripcion} />}
+          <div className="reco-card-actions">
+            {accionesPara(r.estado).map((accion) => (
+              <button
+                key={accion.label}
+                type="button"
+                className="reco-btn"
+                onClick={() => onCambiarEstado(r.id, accion.nuevoEstado)}
+              >
+                {accion.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
+    </div>
+  );
+}
+
 function accionesPara(estado: Estado): { label: string; nuevoEstado: Estado }[] {
   switch (estado) {
     case "pendiente":
@@ -160,27 +211,12 @@ export default function RecomendacionesPanel({ session }: { session: Session }) 
               <div className="reco-column-list">
                 {items.length === 0 && <p style={{ color: "#666", fontSize: "0.8rem" }}>—</p>}
                 {items.map((r) => (
-                  <div className="reco-card" key={r.id}>
-                    <div className="reco-card-top">
-                      <span className={`chip chip-area familia-${FAMILIA[r.area]}`}>{r.area}</span>
-                      <span className="chip chip-prioridad" data-prioridad={r.prioridad}>{r.prioridad}</span>
-                      <span className="chip chip-origen">{ORIGEN_LABEL[r.origen]}</span>
-                    </div>
-                    <h4>{r.titulo}</h4>
-                    {r.descripcion && <DescripcionCard texto={r.descripcion} />}
-                    <div className="reco-card-actions">
-                      {accionesPara(r.estado).map((accion) => (
-                        <button
-                          key={accion.label}
-                          type="button"
-                          className="reco-btn"
-                          onClick={() => cambiarEstado(r.id, accion.nuevoEstado)}
-                        >
-                          {accion.label}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
+                  <RecoCard
+                    key={r.id}
+                    r={r}
+                    colapsable={col.estado === "hecho" || col.estado === "descartada"}
+                    onCambiarEstado={cambiarEstado}
+                  />
                 ))}
               </div>
             </div>

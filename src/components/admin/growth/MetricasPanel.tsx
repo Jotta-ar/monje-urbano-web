@@ -55,6 +55,23 @@ function Sparkline({ valores }: { valores: number[] }) {
   );
 }
 
+function DeltaSeguidores({ historico }: { historico: PuntoRed[] }) {
+  const puntos = historico
+    .map((p) => p.seguidores)
+    .filter((v): v is number => v !== null && v !== undefined);
+  if (puntos.length < 2) return null;
+
+  const diferencia = puntos[puntos.length - 1] - puntos[puntos.length - 2];
+  if (diferencia === 0) return <p className="stat-sub">Sin cambios desde la última medición</p>;
+
+  const positivo = diferencia > 0;
+  return (
+    <p className={`stat-delta ${positivo ? "up" : "down"}`}>
+      {positivo ? "▲" : "▼"} {Math.abs(diferencia)} desde la última medición
+    </p>
+  );
+}
+
 function Delta({ actual, anterior }: { actual: number; anterior: number }) {
   if (anterior === 0) return <p className="stat-sub">Sin datos del mes anterior</p>;
   const cambio = ((actual - anterior) / anterior) * 100;
@@ -208,6 +225,7 @@ export default function MetricasPanel({ session }: { session: Session }) {
             <>
               <p className="stat-value">{ultimoYoutube.seguidores}</p>
               <p className="stat-sub">{ultimoYoutube.publicaciones} videos</p>
+              <DeltaSeguidores historico={youtube} />
               <Sparkline valores={youtube.map((p) => p.seguidores ?? 0)} />
             </>
           ) : (
@@ -220,6 +238,7 @@ export default function MetricasPanel({ session }: { session: Session }) {
             <>
               <p className="stat-value">{ultimoInstagram.seguidores}</p>
               <p className="stat-sub">{ultimoInstagram.publicaciones} publicaciones</p>
+              <DeltaSeguidores historico={instagram} />
               <Sparkline valores={instagram.map((p) => p.seguidores ?? 0)} />
             </>
           ) : (
@@ -237,6 +256,7 @@ export default function MetricasPanel({ session }: { session: Session }) {
             <>
               <p className="stat-value">{ultimoTikTok.seguidores}</p>
               <p className="stat-sub">{ultimoTikTok.publicaciones} videos</p>
+              <DeltaSeguidores historico={tiktok} />
               <Sparkline valores={tiktok.map((p) => p.seguidores ?? 0)} />
             </>
           ) : (
