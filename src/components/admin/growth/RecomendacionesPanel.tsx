@@ -44,6 +44,25 @@ const ORIGEN_LABEL: Record<Origen, string> = {
   manual: "manual",
 };
 
+const LARGO_MAX_DESCRIPCION = 160;
+
+function DescripcionCard({ texto }: { texto: string }) {
+  const [expandido, setExpandido] = useState(false);
+  const esLarga = texto.length > LARGO_MAX_DESCRIPCION;
+  const mostrado = expandido || !esLarga ? texto : texto.slice(0, LARGO_MAX_DESCRIPCION).trimEnd() + "…";
+
+  return (
+    <>
+      <p>{mostrado}</p>
+      {esLarga && (
+        <button type="button" className="reco-btn ver-mas" onClick={() => setExpandido((v) => !v)}>
+          {expandido ? "Ver menos" : "Ver más"}
+        </button>
+      )}
+    </>
+  );
+}
+
 function accionesPara(estado: Estado): { label: string; nuevoEstado: Estado }[] {
   switch (estado) {
     case "pendiente":
@@ -148,7 +167,7 @@ export default function RecomendacionesPanel({ session }: { session: Session }) 
                       <span className="chip chip-origen">{ORIGEN_LABEL[r.origen]}</span>
                     </div>
                     <h4>{r.titulo}</h4>
-                    {r.descripcion && <p>{r.descripcion}</p>}
+                    {r.descripcion && <DescripcionCard texto={r.descripcion} />}
                     <div className="reco-card-actions">
                       {accionesPara(r.estado).map((accion) => (
                         <button
