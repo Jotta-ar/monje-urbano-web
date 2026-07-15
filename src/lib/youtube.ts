@@ -1,4 +1,5 @@
 import "server-only";
+import { supabaseAdmin } from "@/lib/supabase-admin";
 
 const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
 const YOUTUBE_CHANNEL_ID = process.env.YOUTUBE_CHANNEL_ID;
@@ -49,4 +50,25 @@ export async function obtenerEstadisticasYoutube(): Promise<EstadisticasYoutube 
     console.error("Falló la llamada a YouTube Data API:", err);
     return null;
   }
+}
+
+export async function registrarSnapshotYoutube(): Promise<EstadisticasYoutube | null> {
+  if (!supabaseAdmin) return null;
+
+  const stats = await obtenerEstadisticasYoutube();
+  if (!stats) return null;
+
+  const { error } = await supabaseAdmin.from("redes_metricas").insert({
+    plataforma: "youtube",
+    seguidores: stats.seguidores,
+    publicaciones: stats.publicaciones,
+    metrica_extra: { vistas_totales: stats.vistasTotales },
+  });
+
+  if (error) {
+    console.error("No se pudo guardar la métrica de YouTube:", error);
+    return null;
+  }
+
+  return stats;
 }

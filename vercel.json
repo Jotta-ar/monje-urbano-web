@@ -1,16 +1,8 @@
 {
   "crons": [
     {
-      "path": "/api/cron/youtube-metricas",
-      "schedule": "0 12 * * 1"
-    },
-    {
-      "path": "/api/cron/tiktok-metricas",
-      "schedule": "30 12 * * 1"
-    },
-    {
-      "path": "/api/cron/instagram-metricas",
-      "schedule": "0 13 * * 1"
+      "path": "/api/cron/redes-metricas",
+      "schedule": "0 12 * * *"
     }
   ]
 }
