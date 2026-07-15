@@ -66,26 +66,31 @@ function Delta({ actual, anterior }: { actual: number; anterior: number }) {
   );
 }
 
-export default function MetricasPanel({
-  session,
-  onIrARecomendaciones,
-}: {
-  session: Session;
-  onIrARecomendaciones: () => void;
-}) {
+export default function MetricasPanel({ session }: { session: Session }) {
   const [metricas, setMetricas] = useState<Metricas | null>(null);
   const [redes, setRedes] = useState<Redes | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [avisoTikTok, setAvisoTikTok] = useState<"conectado" | "error" | null>(null);
+  const [avisoInstagram, setAvisoInstagram] = useState<"conectado" | "error" | null>(null);
   const token = session.access_token;
 
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    const resultado = params.get("tiktok");
-    if (resultado === "conectado" || resultado === "error") {
+    const resultadoTikTok = params.get("tiktok");
+    const resultadoInstagram = params.get("instagram");
+    let cambio = false;
+    if (resultadoTikTok === "conectado" || resultadoTikTok === "error") {
       // eslint-disable-next-line react-hooks/set-state-in-effect
-      setAvisoTikTok(resultado);
+      setAvisoTikTok(resultadoTikTok);
       params.delete("tiktok");
+      cambio = true;
+    }
+    if (resultadoInstagram === "conectado" || resultadoInstagram === "error") {
+      setAvisoInstagram(resultadoInstagram);
+      params.delete("instagram");
+      cambio = true;
+    }
+    if (cambio) {
       const query = params.toString();
       window.history.replaceState({}, "", window.location.pathname + (query ? `?${query}` : ""));
     }
@@ -116,6 +121,8 @@ export default function MetricasPanel({
   const ultimoYoutube = youtube[youtube.length - 1];
   const tiktok = redes.historico.tiktok ?? [];
   const ultimoTikTok = tiktok[tiktok.length - 1];
+  const instagram = redes.historico.instagram ?? [];
+  const ultimoInstagram = instagram[instagram.length - 1];
 
   return (
     <div>
@@ -130,6 +137,14 @@ export default function MetricasPanel({
       {avisoTikTok === "error" && (
         <p style={{ color: "var(--danger)", fontSize: "0.9rem", marginBottom: 20 }}>
           No se pudo conectar TikTok, probá de nuevo.
+        </p>
+      )}
+      {avisoInstagram === "conectado" && (
+        <p style={{ color: "var(--ok)", fontSize: "0.9rem", marginBottom: 20 }}>Instagram conectado correctamente ✓</p>
+      )}
+      {avisoInstagram === "error" && (
+        <p style={{ color: "var(--danger)", fontSize: "0.9rem", marginBottom: 20 }}>
+          No se pudo conectar Instagram, probá de nuevo.
         </p>
       )}
 
@@ -199,10 +214,22 @@ export default function MetricasPanel({
             <p className="stat-sub">Sin datos todavía — se carga solo cada lunes.</p>
           )}
         </div>
-        <div className="stat-tile is-muted is-link" onClick={onIrARecomendaciones} role="button" tabIndex={0}>
+        <div className={`stat-tile${ultimoInstagram ? "" : " is-muted"}`}>
           <p className="stat-label">Instagram</p>
-          <p className="stat-value" style={{ fontSize: "1.1rem" }}>Sin conectar</p>
-          <p className="stat-sub">Ver recomendación →</p>
+          {ultimoInstagram ? (
+            <>
+              <p className="stat-value">{ultimoInstagram.seguidores}</p>
+              <p className="stat-sub">{ultimoInstagram.publicaciones} publicaciones</p>
+              <Sparkline valores={instagram.map((p) => p.seguidores ?? 0)} />
+            </>
+          ) : (
+            <>
+              <p className="stat-value" style={{ fontSize: "1.1rem" }}>Sin conectar</p>
+              <a href={`/api/admin/redes/instagram/conectar?token=${token}`} className="stat-sub" style={{ textDecoration: "underline" }}>
+                Conectar Instagram →
+              </a>
+            </>
+          )}
         </div>
         <div className={`stat-tile${ultimoTikTok ? "" : " is-muted"}`}>
           <p className="stat-label">TikTok</p>

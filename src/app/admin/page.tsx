@@ -146,7 +146,7 @@ function AdminTabs({ session }: { session: Session }) {
         </button>
       </div>
 
-      {tab === "metricas" && <MetricasPanel session={session} onIrARecomendaciones={() => setTab("recomendaciones")} />}
+      {tab === "metricas" && <MetricasPanel session={session} />}
       {tab === "recomendaciones" && <RecomendacionesPanel session={session} />}
       {tab === "contactos" && <ContactosPanel session={session} />}
       {tab === "pedidos" && <PedidosPanel session={session} />}
