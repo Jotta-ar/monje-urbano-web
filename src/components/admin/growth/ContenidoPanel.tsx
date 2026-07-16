@@ -32,48 +32,69 @@ interface Pieza {
   creado_en: string;
 }
 
-const COLUMNAS: { estado: Estado; titulo: string }[] = [
-  { estado: "borrador", titulo: "Borrador" },
-  { estado: "aprobada", titulo: "Aprobada" },
-  { estado: "publicada", titulo: "Publicada" },
-  { estado: "descartada", titulo: "Descartada" },
-];
-
 const EJE_LABEL: Record<Eje, string> = {
   elevarse: "Elevarse",
   centrarse: "Centrarse",
   enraizarse: "Enraizarse",
 };
-const EJE_FAMILIA: Record<Eje, string> = {
-  elevarse: "conversion", // reusa los colores ya definidos para los chips de área
-  centrarse: "relacion",
-  enraizarse: "base",
-};
 
 const TIPO_LABEL: Record<Tipo, string> = {
-  nucleo: "Reels / TikTok / Shorts",
+  nucleo: "Reel · TikTok · Short",
   youtube_largo: "YouTube largo",
 };
 
-function accionesPara(estado: Estado): { label: string; nuevoEstado: Estado }[] {
-  switch (estado) {
-    case "borrador":
-      return [
-        { label: "Aprobar", nuevoEstado: "aprobada" },
-        { label: "Descartar", nuevoEstado: "descartada" },
-      ];
-    case "aprobada":
-      return [
-        { label: "Marcar publicada", nuevoEstado: "publicada" },
-        { label: "Volver a borrador", nuevoEstado: "borrador" },
-      ];
-    case "publicada":
-    case "descartada":
-      return [{ label: "Reabrir a borrador", nuevoEstado: "borrador" }];
-  }
+const ESTADO_LABEL: Record<Estado, string> = {
+  borrador: "Sin revisar",
+  aprobada: "Aprobada",
+  publicada: "Publicada",
+  descartada: "Descartada",
+};
+
+// Roadmap de automatización de redes (ver diseño de pipeline acordado con Jose).
+// Se actualiza a mano acá cuando una fase realmente se conecta — no se deriva
+// de "recomendaciones" para no depender de que nadie edite un título ahí.
+const ROADMAP: { fase: string; titulo: string; estado: "hecho" | "en_progreso" | "pendiente"; detalle: string }[] = [
+  { fase: "Fase 0", titulo: "Motor de contenido", estado: "hecho", detalle: "Curador + guionista + ensamblador, corriendo" },
+  { fase: "Fase 1", titulo: "YouTube automático", estado: "pendiente", detalle: "Falta conectar la Data API para publicar solo" },
+  { fase: "Fase 2", titulo: "Instagram automático", estado: "pendiente", detalle: "Permiso ya concedido, falta el publicador" },
+  { fase: "Fase 3", titulo: "TikTok automático", estado: "pendiente", detalle: "Sandbox — falta pasar revisión de producción" },
+];
+
+type Filtro = "revisar" | "aprobada" | "publicada" | "descartada" | "todas";
+
+const FILTROS: { key: Filtro; label: string }[] = [
+  { key: "revisar", label: "Para revisar" },
+  { key: "aprobada", label: "Aprobadas" },
+  { key: "publicada", label: "Publicadas" },
+  { key: "descartada", label: "Descartadas" },
+  { key: "todas", label: "Todas" },
+];
+
+function formatearFecha(fecha: string) {
+  return new Date(fecha + "T00:00:00").toLocaleDateString("es-AR", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+  });
 }
 
-function NotaCard({ p, onGuardarNota }: { p: Pieza; onGuardarNota: (id: string, notas: string) => void }) {
+function RoadmapStrip() {
+  return (
+    <div className="cnt-roadmap">
+      {ROADMAP.map((r) => (
+        <div key={r.fase} className="cnt-roadmap-step" data-estado={r.estado}>
+          <div className="cnt-roadmap-fase">{r.fase}</div>
+          <div className="cnt-roadmap-titulo">{r.titulo}</div>
+          <div className="cnt-roadmap-estado">
+            {r.estado === "hecho" ? "Hecho" : r.estado === "en_progreso" ? "En curso" : "Pendiente"} — {r.detalle}
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function ComentarioBox({ p, onGuardar }: { p: Pieza; onGuardar: (id: string, notas: string) => void }) {
   const [editando, setEditando] = useState(false);
   const [borrador, setBorrador] = useState(p.notas ?? "");
 
@@ -91,15 +112,22 @@ function NotaCard({ p, onGuardarNota }: { p: Pieza; onGuardarNota: (id: string, 
         <div style={{ display: "flex", gap: 6 }}>
           <button
             type="button"
-            className="reco-btn"
+            className="cnt-btn"
             onClick={() => {
-              onGuardarNota(p.id, borrador.trim());
+              onGuardar(p.id, borrador.trim());
               setEditando(false);
             }}
           >
             Guardar comentario
           </button>
-          <button type="button" className="reco-btn" onClick={() => { setBorrador(p.notas ?? ""); setEditando(false); }}>
+          <button
+            type="button"
+            className="cnt-btn"
+            onClick={() => {
+              setBorrador(p.notas ?? "");
+              setEditando(false);
+            }}
+          >
             Cancelar
           </button>
         </div>
@@ -108,78 +136,100 @@ function NotaCard({ p, onGuardarNota }: { p: Pieza; onGuardarNota: (id: string, 
   }
 
   return (
-    <>
+    <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
       {p.notas && (
-        <p style={{ fontStyle: "italic", borderLeft: "2px solid var(--border)", paddingLeft: 10 }}>{p.notas}</p>
+        <p style={{ fontStyle: "italic", color: "var(--muted)", borderLeft: "2px solid var(--border)", paddingLeft: 10, margin: 0 }}>
+          {p.notas}
+        </p>
       )}
-      <button type="button" className="reco-btn" onClick={() => setEditando(true)} style={{ alignSelf: "flex-start" }}>
+      <button type="button" className="cnt-btn" style={{ alignSelf: "flex-start" }} onClick={() => setEditando(true)}>
         {p.notas ? "Editar comentario" : "Comentar"}
       </button>
-    </>
+    </div>
   );
 }
 
 function PiezaCard({
   p,
-  colapsable,
   elevenlabsDisponible,
   onCambiarEstado,
   onGuardarNota,
   onCambiarVoz,
 }: {
   p: Pieza;
-  colapsable: boolean;
   elevenlabsDisponible: boolean;
   onCambiarEstado: (id: string, nuevoEstado: Estado) => void;
   onGuardarNota: (id: string, notas: string) => void;
   onCambiarVoz: (id: string, voz: VozProvider) => void;
 }) {
-  const [expandido, setExpandido] = useState(!colapsable);
+  const [expandido, setExpandido] = useState(false);
   const hook = p.lineas.find((l) => l.estilo === "hook")?.texto ?? p.titulo ?? "(sin hook)";
 
   return (
-    <div className="reco-card">
-      <div className="reco-card-top">
-        <span className="chip chip-area">{TIPO_LABEL[p.tipo]}</span>
-        {p.cruce_eje && (
-          <span className={`chip chip-area familia-${EJE_FAMILIA[p.cruce_eje]}`}>{EJE_LABEL[p.cruce_eje]}</span>
-        )}
+    <div className="cnt-card" data-estado={p.estado}>
+      <div className="cnt-card-top">
+        <span className="chip chip-origen">{TIPO_LABEL[p.tipo]}</span>
+        {p.cruce_eje && <span className="chip chip-origen">{EJE_LABEL[p.cruce_eje]}</span>}
         {p.es_cta_directo && <span className="chip chip-prioridad" data-prioridad="alta">CTA directo</span>}
-        {colapsable && (
-          <button
-            type="button"
-            className="reco-btn ver-mas"
-            style={{ marginLeft: "auto" }}
-            onClick={() => setExpandido((v) => !v)}
-            aria-label={expandido ? "Colapsar" : "Expandir"}
-          >
-            {expandido ? "▲" : "▼"}
-          </button>
-        )}
+        <span className="cnt-status-pill" data-estado={p.estado}>{ESTADO_LABEL[p.estado]}</span>
       </div>
-      <h4>{hook}</h4>
-      <p style={{ fontSize: "0.75rem", color: "#777", margin: "0 0 8px" }}>
-        Tanda del {new Date(p.tanda_fecha + "T00:00:00").toLocaleDateString("es-AR")}
-        {p.cruce_principio ? ` · ${p.cruce_principio}` : ""}
+
+      <p className="cnt-card-hook">{hook}</p>
+      <p className="cnt-card-meta">
+        {p.cruce_principio ?? p.titulo}
+        {p.notas && <span className="cnt-comentario-flag"> · tiene un comentario tuyo</span>}
       </p>
+
+      {p.estado === "borrador" && (
+        <div className="cnt-quick-actions">
+          <button type="button" className="cnt-btn aprobar" onClick={() => onCambiarEstado(p.id, "aprobada")}>
+            Aprobar
+          </button>
+          <button type="button" className="cnt-btn descartar" onClick={() => onCambiarEstado(p.id, "descartada")}>
+            Descartar
+          </button>
+        </div>
+      )}
+      {p.estado === "aprobada" && (
+        <div className="cnt-quick-actions">
+          <button type="button" className="cnt-btn aprobar" onClick={() => onCambiarEstado(p.id, "publicada")}>
+            Marcar publicada
+          </button>
+          <button type="button" className="cnt-btn" onClick={() => onCambiarEstado(p.id, "borrador")}>
+            Volver a revisar
+          </button>
+        </div>
+      )}
+      {(p.estado === "publicada" || p.estado === "descartada") && (
+        <div className="cnt-quick-actions">
+          <button type="button" className="cnt-btn" onClick={() => onCambiarEstado(p.id, "borrador")}>
+            Reabrir
+          </button>
+        </div>
+      )}
+
+      <button type="button" className="reco-btn ver-mas" style={{ alignSelf: "flex-start" }} onClick={() => setExpandido((v) => !v)}>
+        {expandido ? "Ver menos" : "Ver guion completo"}
+      </button>
 
       {expandido && (
         <>
-          <div style={{ display: "flex", flexDirection: "column", gap: 6, marginBottom: 10 }}>
+          <p className="cnt-guion">
             {p.lineas.map((l, i) => (
-              <p key={i} style={{ margin: 0, fontStyle: l.estilo === "cierre" ? "italic" : "normal" }}>
+              <span key={i} className={l.estilo === "cierre" ? "cierre" : undefined}>
                 {l.texto}
-              </p>
+                {i < p.lineas.length - 1 ? "\n" : ""}
+              </span>
             ))}
-          </div>
+          </p>
 
           {p.puente_venta && (
-            <p style={{ fontSize: "0.8rem", color: "#999", margin: "0 0 10px" }}>
-              Puente de venta: {p.puente_venta}
-            </p>
+            <p style={{ fontSize: "0.8rem", color: "var(--muted)", margin: 0 }}>Puente de venta: {p.puente_venta}</p>
           )}
 
-          <div className="form-group" style={{ marginBottom: 10 }}>
+          {p.video_url && <video controls src={p.video_url} className="cnt-video" />}
+
+          <div className="form-group" style={{ marginBottom: 0 }}>
             <label style={{ fontSize: "0.8rem" }}>Voz</label>
             <div className="radio-group" style={{ display: "flex", gap: 14, marginTop: 4 }}>
               <label style={{ cursor: "pointer" }}>
@@ -204,24 +254,7 @@ function PiezaCard({
             </div>
           </div>
 
-          {p.video_url && (
-            <video controls src={p.video_url} style={{ width: "100%", maxWidth: 280, borderRadius: 6, marginBottom: 10 }} />
-          )}
-
-          <NotaCard p={p} onGuardarNota={onGuardarNota} />
-
-          <div className="reco-card-actions">
-            {accionesPara(p.estado).map((accion) => (
-              <button
-                key={accion.label}
-                type="button"
-                className="reco-btn"
-                onClick={() => onCambiarEstado(p.id, accion.nuevoEstado)}
-              >
-                {accion.label}
-              </button>
-            ))}
-          </div>
+          <ComentarioBox p={p} onGuardar={onGuardarNota} />
         </>
       )}
     </div>
@@ -232,6 +265,7 @@ export default function ContenidoPanel({ session }: { session: Session }) {
   const [piezas, setPiezas] = useState<Pieza[] | null>(null);
   const [elevenlabsDisponible, setElevenlabsDisponible] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [filtro, setFiltro] = useState<Filtro>("revisar");
   const token = session.access_token;
 
   async function cargar() {
@@ -275,8 +309,33 @@ export default function ContenidoPanel({ session }: { session: Session }) {
   const cambiarVoz = (id: string, voz: VozProvider) =>
     actualizar(id, { vozProvider: voz }, { voz_provider: voz });
 
+  async function aprobarTanda(fecha: string) {
+    const idsAAprobar = (piezas ?? []).filter((p) => p.tanda_fecha === fecha && p.estado === "borrador").map((p) => p.id);
+    setPiezas((prev) => prev?.map((p) => (idsAAprobar.includes(p.id) ? { ...p, estado: "aprobada" } : p)) ?? null);
+    await Promise.all(
+      idsAAprobar.map((id) =>
+        fetch(`/api/admin/contenido/${id}`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+          body: JSON.stringify({ estado: "aprobada" }),
+        })
+      )
+    );
+    cargar();
+  }
+
   if (error && !piezas) return <p style={{ color: "#ff6666", fontSize: "0.85rem" }}>{error}</p>;
   if (!piezas) return <p style={{ color: "#888" }}>Cargando…</p>;
+
+  const contador = (est: Estado) => piezas.filter((p) => p.estado === est).length;
+
+  const visibles = piezas.filter((p) => {
+    if (filtro === "revisar") return p.estado === "borrador";
+    if (filtro === "todas") return true;
+    return p.estado === filtro;
+  });
+
+  const fechas = [...new Set(visibles.map((p) => p.tanda_fecha))].sort((a, b) => (a < b ? 1 : -1));
 
   return (
     <div>
@@ -289,37 +348,62 @@ export default function ContenidoPanel({ session }: { session: Session }) {
         </p>
       </div>
 
+      <RoadmapStrip />
+
       {error && <p style={{ color: "#ff6666", fontSize: "0.85rem", marginBottom: 16 }}>{error}</p>}
 
-      <div className="reco-board">
-        {COLUMNAS.map((col) => {
-          const items = piezas
-            .filter((p) => p.estado === col.estado)
-            .sort((a, b) => (a.tanda_fecha < b.tanda_fecha ? 1 : -1));
-          return (
-            <div key={col.estado}>
-              <div className="reco-column-header">
-                <span>{col.titulo}</span>
-                <span>{items.length}</span>
-              </div>
-              <div className="reco-column-list">
-                {items.length === 0 && <p style={{ color: "#666", fontSize: "0.8rem" }}>—</p>}
-                {items.map((p) => (
-                  <PiezaCard
-                    key={p.id}
-                    p={p}
-                    colapsable={col.estado === "publicada" || col.estado === "descartada"}
-                    elevenlabsDisponible={elevenlabsDisponible}
-                    onCambiarEstado={cambiarEstado}
-                    onGuardarNota={guardarNota}
-                    onCambiarVoz={cambiarVoz}
-                  />
-                ))}
-              </div>
-            </div>
-          );
-        })}
+      <div className="cnt-filters">
+        {FILTROS.map((f) => (
+          <button
+            key={f.key}
+            type="button"
+            className={filtro === f.key ? "btn-primary" : "btn-secondary"}
+            style={{ padding: "6px 16px", fontSize: "0.85rem" }}
+            onClick={() => setFiltro(f.key)}
+          >
+            {f.label}
+            {f.key !== "todas" && ` (${contador(f.key === "revisar" ? "borrador" : f.key)})`}
+          </button>
+        ))}
       </div>
+
+      {fechas.length === 0 && (
+        <p style={{ color: "#666" }}>
+          {filtro === "revisar" ? "No hay piezas esperando revisión. ✨" : "No hay piezas en este filtro."}
+        </p>
+      )}
+
+      {fechas.map((fecha) => {
+        const piezasSemana = visibles.filter((p) => p.tanda_fecha === fecha);
+        const pendientesSemana = piezasSemana.filter((p) => p.estado === "borrador").length;
+        return (
+          <div key={fecha} className="cnt-week">
+            <div className="cnt-week-header">
+              <div>
+                <div className="cnt-week-titulo">Tanda del {formatearFecha(fecha)}</div>
+                <div className="cnt-week-meta">{piezasSemana.length} pieza{piezasSemana.length === 1 ? "" : "s"}</div>
+              </div>
+              {pendientesSemana > 1 && (
+                <button type="button" className="cnt-btn aprobar" onClick={() => aprobarTanda(fecha)}>
+                  Aprobar las {pendientesSemana} pendientes de esta tanda
+                </button>
+              )}
+            </div>
+            <div className="cnt-grid">
+              {piezasSemana.map((p) => (
+                <PiezaCard
+                  key={p.id}
+                  p={p}
+                  elevenlabsDisponible={elevenlabsDisponible}
+                  onCambiarEstado={cambiarEstado}
+                  onGuardarNota={guardarNota}
+                  onCambiarVoz={cambiarVoz}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
     </div>
   );
 }
