@@ -9,6 +9,7 @@ import MetricasPanel from "@/components/admin/growth/MetricasPanel";
 import RecomendacionesPanel from "@/components/admin/growth/RecomendacionesPanel";
 import ContactosPanel from "@/components/admin/growth/ContactosPanel";
 import ReportesPanel from "@/components/admin/growth/ReportesPanel";
+import ContenidoPanel from "@/components/admin/growth/ContenidoPanel";
 
 interface PrecioRow {
   id: string;
@@ -61,6 +62,7 @@ function AdminTabs({ session }: { session: Session }) {
     | "recomendaciones"
     | "reportes"
     | "contactos"
+    | "contenido"
     | "precios"
     | "pedidos"
     | "regalar"
@@ -70,7 +72,7 @@ function AdminTabs({ session }: { session: Session }) {
   >("metricas");
 
   const esPanelDeCrecimiento =
-    tab === "metricas" || tab === "recomendaciones" || tab === "reportes" || tab === "contactos";
+    tab === "metricas" || tab === "recomendaciones" || tab === "reportes" || tab === "contactos" || tab === "contenido";
 
   return (
     <div className="form-plain" style={{ maxWidth: esPanelDeCrecimiento ? 1440 : 1000 }}>
@@ -106,6 +108,14 @@ function AdminTabs({ session }: { session: Session }) {
           onClick={() => setTab("contactos")}
         >
           Contactos
+        </button>
+        <button
+          type="button"
+          className={tab === "contenido" ? "btn-primary" : "btn-secondary"}
+          style={{ padding: "8px 22px" }}
+          onClick={() => setTab("contenido")}
+        >
+          Contenido
         </button>
         <button
           type="button"
@@ -161,6 +171,7 @@ function AdminTabs({ session }: { session: Session }) {
       {tab === "recomendaciones" && <RecomendacionesPanel session={session} />}
       {tab === "reportes" && <ReportesPanel session={session} />}
       {tab === "contactos" && <ContactosPanel session={session} />}
+      {tab === "contenido" && <ContenidoPanel session={session} />}
       {tab === "pedidos" && <PedidosPanel session={session} />}
       {tab === "regalar" && <RegalarPanel session={session} />}
       {tab === "precios" && <PreciosPanel />}
