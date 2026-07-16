@@ -1271,13 +1271,34 @@ fieldset {
 }
 
 .cnt-roadmap-step {
+  width: 100%;
   padding: 14px 18px;
   border-right: 1px solid var(--border);
   border-top: 2px solid var(--muted);
+  border-left: none;
+  border-bottom: none;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  transition: background-color 0.15s ease;
 }
 .cnt-roadmap-step:last-child { border-right: none; }
+.cnt-roadmap-step:hover { background: rgba(255, 255, 255, 0.04); }
+.cnt-roadmap-step:focus-visible { outline: 2px solid var(--moon-yellow); outline-offset: -2px; }
 .cnt-roadmap-step[data-estado="hecho"] { border-top-color: var(--ok); }
 .cnt-roadmap-step[data-estado="en_progreso"] { border-top-color: var(--warn); }
+
+.cnt-roadmap-link {
+  font-size: 0.75rem;
+  color: var(--muted-2);
+  margin-top: 8px;
+  opacity: 0;
+  transition: opacity 0.15s ease;
+}
+.cnt-roadmap-step:hover .cnt-roadmap-link,
+.cnt-roadmap-step:focus-visible .cnt-roadmap-link { opacity: 1; }
 
 .cnt-roadmap-fase {
   font-size: 0.72rem;

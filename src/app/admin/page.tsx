@@ -171,7 +171,9 @@ function AdminTabs({ session }: { session: Session }) {
       {tab === "recomendaciones" && <RecomendacionesPanel session={session} />}
       {tab === "reportes" && <ReportesPanel session={session} />}
       {tab === "contactos" && <ContactosPanel session={session} />}
-      {tab === "contenido" && <ContenidoPanel session={session} />}
+      {tab === "contenido" && (
+        <ContenidoPanel session={session} onIrARecomendaciones={() => setTab("recomendaciones")} />
+      )}
       {tab === "pedidos" && <PedidosPanel session={session} />}
       {tab === "regalar" && <RegalarPanel session={session} />}
       {tab === "precios" && <PreciosPanel />}

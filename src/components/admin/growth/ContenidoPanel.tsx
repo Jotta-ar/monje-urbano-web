@@ -78,17 +78,24 @@ function formatearFecha(fecha: string) {
   });
 }
 
-function RoadmapStrip() {
+function RoadmapStrip({ onIrARecomendaciones }: { onIrARecomendaciones: () => void }) {
   return (
     <div className="cnt-roadmap">
       {ROADMAP.map((r) => (
-        <div key={r.fase} className="cnt-roadmap-step" data-estado={r.estado}>
+        <button
+          key={r.fase}
+          type="button"
+          className="cnt-roadmap-step"
+          data-estado={r.estado}
+          onClick={onIrARecomendaciones}
+        >
           <div className="cnt-roadmap-fase">{r.fase}</div>
           <div className="cnt-roadmap-titulo">{r.titulo}</div>
           <div className="cnt-roadmap-estado">
             {r.estado === "hecho" ? "Hecho" : r.estado === "en_progreso" ? "En curso" : "Pendiente"} — {r.detalle}
           </div>
-        </div>
+          <div className="cnt-roadmap-link">Ver en Recomendaciones →</div>
+        </button>
       ))}
     </div>
   );
@@ -261,7 +268,13 @@ function PiezaCard({
   );
 }
 
-export default function ContenidoPanel({ session }: { session: Session }) {
+export default function ContenidoPanel({
+  session,
+  onIrARecomendaciones,
+}: {
+  session: Session;
+  onIrARecomendaciones: () => void;
+}) {
   const [piezas, setPiezas] = useState<Pieza[] | null>(null);
   const [elevenlabsDisponible, setElevenlabsDisponible] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -348,7 +361,7 @@ export default function ContenidoPanel({ session }: { session: Session }) {
         </p>
       </div>
 
-      <RoadmapStrip />
+      <RoadmapStrip onIrARecomendaciones={onIrARecomendaciones} />
 
       {error && <p style={{ color: "#ff6666", fontSize: "0.85rem", marginBottom: 16 }}>{error}</p>}
 
