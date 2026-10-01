@@ -13,6 +13,19 @@ export default function SincronarioWidget() {
 
   if (!data) return null;
 
+  if (data.fueraDelTiempo) {
+    return (
+      <div className="sincronario-float">
+        <div className="sf-title">Día Fuera del Tiempo</div>
+        <div className="sf-fase">
+          <MoonIcon phase={data.fase} className="sf-moon" />
+          {data.fase}
+        </div>
+        <div className="sf-tip">Hoy no hay número. Solo presencia.</div>
+      </div>
+    );
+  }
+
   return (
     <div className="sincronario-float">
       <div className="sf-title">Sincronario 13 Lunas</div>
